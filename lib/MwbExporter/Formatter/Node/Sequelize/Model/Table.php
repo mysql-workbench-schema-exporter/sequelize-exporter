@@ -46,7 +46,14 @@ class Table extends BaseTable
      */
     public function getJSObject($content, $multiline = true, $raw = false)
     {
-        return new JS($content, array('multiline' => $multiline, 'raw' => $raw, 'indent' => $this->getConfig()->get(Formatter::CFG_INDENTATION))); 
+        $indentation = $this->getConfig()->get(Formatter::CFG_USE_TABS) ? "\t" : ' ';
+        $indentation = str_repeat($indentation, $this->getConfig()->get(Formatter::CFG_INDENTATION));
+
+        return new JS($content, array(
+            'multiline' => $multiline,
+            'raw' => $raw,
+            'indentation' => $indentation,
+        ));
     }
 
     /**
@@ -77,7 +84,7 @@ class Table extends BaseTable
 
     /**
      * Write model body code.
-     * 
+     *
      * @param \MwbExporter\Writer\WriterInterface $writer
      * @return \MwbExporter\Formatter\Node\Sequelize\Model\Table
      */
@@ -129,7 +136,7 @@ class Table extends BaseTable
     protected function getFields()
     {
         $result = array();
-        foreach ($this->getColumns() as $column) 
+        foreach ($this->getColumns() as $column)
         {
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
             $c = array();
