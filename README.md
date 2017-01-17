@@ -1,6 +1,6 @@
 # README
 
-This is an exporter to convert [MySQL Workbench](http://www.mysql.com/products/workbench/) Models (\*.mwb) to Sencha Sequelize Schema.
+This is an exporter to convert [MySQL Workbench](http://www.mysql.com/products/workbench/) Models (\*.mwb) to Nodejs Sequelize Schema.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This is an exporter to convert [MySQL Workbench](http://www.mysql.com/products/w
 ## Installation
 
 ```
-php composer.phar require --dev mysql-workbench-schema-exporter/sencha-exporter
+php composer.phar require --dev mysql-workbench-schema-exporter/node-exporter
 ```
 
 This will install the exporter and also require [mysql-workbench-schema-exporter](https://github.com/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter).
