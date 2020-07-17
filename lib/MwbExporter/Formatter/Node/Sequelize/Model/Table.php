@@ -33,6 +33,7 @@ use MwbExporter\Formatter\Node\Sequelize\Formatter;
 use MwbExporter\Writer\WriterInterface;
 use MwbExporter\Object\JS;
 use MwbExporter\Helper\Comment;
+use MwbExporter\Formatter\DatatypeConverterInterface;
 
 class Table extends BaseTable
 {
@@ -54,15 +55,6 @@ class Table extends BaseTable
             'raw' => $raw,
             'indentation' => $indentation,
         ));
-    }
-
-    /**
-     * (non-PHPdoc)
-     * @see \MwbExporter\Model\Base::getVars()
-     */
-    protected function getVars()
-    {
-        return array_merge(parent::getVars(), array('%entity%' => strtolower($this->getModelName())));
     }
 
     public function writeTable(WriterInterface $writer)
@@ -112,9 +104,10 @@ class Table extends BaseTable
     protected function asOptions()
     {
         $result = array(
+            'tableName' => $this->getRawTableName(),
+            'indexes' => count($indexes = $this->getIndexes()) ? $indexes : null,
             'timestamps' => false,
             'underscored' => true,
-            'tableName' => $this->getRawTableName(),
             'syncOnAssociation' => false
         );
 
@@ -139,6 +132,11 @@ class Table extends BaseTable
         foreach ($this->getColumns() as $column)
         {
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
+            if (DatatypeConverterInterface::DATATYPE_DECIMAL == $column->getColumnType()) {
+                $type .= sprintf('(%s, %s)', $column->getParameters()->get('precision'), $column->getParameters()->get('scale'));
+            } elseif (($len = $column->getLength()) > 0) {
+                $type .= sprintf('(%s)', $len);
+            }
             $c = array();
             $c['type'] = $this->getJSObject(sprintf('DataTypes.%s', $type ? $type : 'STRING.BINARY'), true, true);
             if ($column->isPrimary()) {
@@ -146,8 +144,26 @@ class Table extends BaseTable
             }
             if ($column->isAutoIncrement()) {
                 $c['autoIncrement'] = true;
+            } elseif ($column->isNotNull()) {
+                $c['allowNull'] = false;
             }
             $result[$column->getColumnName()] = $c;
+        }
+
+        return $result;
+    }
+
+    protected function getIndexes()
+    {
+        $result = array();
+        foreach ($this->getIndices() as $index) {
+            if ($index->isIndex() || $index->isUnique()) {
+                $result[] = array(
+                    'name' => $index->getName(),
+                    'fields' => $this->getJSObject($index->getColumnNames(), false),
+                    'unique' => $index->isUnique() ? true : null,
+                );
+            }
         }
 
         return $result;
