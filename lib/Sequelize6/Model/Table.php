@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2014 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2020 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,10 +26,10 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize\Model;
+namespace MwbExporter\Formatter\Node\Sequelize6\Model;
 
 use MwbExporter\Model\Table as BaseTable;
-use MwbExporter\Formatter\Node\Sequelize\Formatter;
+use MwbExporter\Formatter\Node\Sequelize6\Formatter;
 use MwbExporter\Writer\WriterInterface;
 use MwbExporter\Object\JS;
 use MwbExporter\Helper\Comment;
@@ -78,7 +78,7 @@ class Table extends BaseTable
      * Write model body code.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
-     * @return \MwbExporter\Formatter\Node\Sequelize\Model\Table
+     * @return \MwbExporter\Formatter\Node\Sequelize6\Model\Table
      */
     protected function writeBody(WriterInterface $writer)
     {
@@ -91,9 +91,14 @@ class Table extends BaseTable
                     ;
                 }
             })
-            ->write("module.exports = function(sequelize, DataTypes) {")
+            ->write("const { DataTypes, Model } = require('sequelize');")
+            ->write("")
+            ->write("class %s extends Model {", $this->getModelName())
+            ->write("}")
+            ->write("")
+            ->write("module.exports = (sequelize) => {")
             ->indent()
-                ->write("return sequelize.define('%s', %s, %s);", $this->getModelName(), $this->asModel(), $this->asOptions())
+                ->write("return %s.init(%s, %s);", $this->getModelName(), $this->asModel(), $this->asOptions())
             ->outdent()
             ->write("}")
         ;
@@ -104,6 +109,8 @@ class Table extends BaseTable
     protected function asOptions()
     {
         $result = array(
+            'sequelize' => $this->getJSObject('sequelize', false, true),
+            'modelName' => $this->getModelName(),
             'tableName' => $this->getRawTableName(),
             'indexes' => count($indexes = $this->getIndexes()) ? $indexes : null,
             'timestamps' => false,
@@ -129,6 +136,7 @@ class Table extends BaseTable
     protected function getFields()
     {
         $result = array();
+        /** @var \MwbExporter\Model\Column $column */
         foreach ($this->getColumns() as $column)
         {
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
@@ -146,6 +154,22 @@ class Table extends BaseTable
                 $c['autoIncrement'] = true;
             } elseif ($column->isNotNull()) {
                 $c['allowNull'] = false;
+            }
+            if (count($column->getForeignKeys())) {
+                $c['references'] = array();
+                /** @var \MwbExporter\Model\ForeignKey $foreignKey */
+                foreach ($column->getForeignKeys() as $foreignKey) {
+                    $c['references']['model'] = $foreignKey->getReferencedTable()->getModelName();
+                    $c['references']['key'] = implode(';', $foreignKey->getForeignColumns());
+                    if ($onUpdate = $foreignKey->getParameter('updateRule'))
+                    {
+                        $c['onUpdate'] = strtoupper($onUpdate);
+                    }
+                    if ($onDelete = $foreignKey->getParameter('deleteRule'))
+                    {
+                        $c['onDelete'] = strtoupper($onDelete);
+                    }
+                }
             }
             $result[$column->getColumnName()] = $c;
         }
