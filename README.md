@@ -29,6 +29,32 @@ Currently, no special options can be configured for Sequelize Model.
 
 See documentation for [mysql-workbench-schema-exporter](https://github.com/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter#command-line-interface-cli)
 
+## Nodejs Usage Example
+
+### Sequelize 5
+
+```
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize({...});
+const MyModel = sequelize.import('./path/to/MyModel');
+
+// do something with MyModel
+MyModel.findOne({...}).then((res) => {...});
+```
+
+### Sequelize 6
+
+```
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize({...});
+const MyModel = require('./path/to/MyModel')(sequelize);
+
+// do something with MyModel
+MyModel.findOne({...}).then((res) => {...});
+```
+
 ## Links
 
   * [MySQL Workbench](http://wb.mysql.com/)
