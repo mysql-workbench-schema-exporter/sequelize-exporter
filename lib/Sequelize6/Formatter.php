@@ -33,6 +33,26 @@ use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
 {
+    const CFG_USE_SEMICOLONS                        = 'useSemicolons';
+    const CFG_GENERATE_ASSOCIATION_METHOD           = 'generateAssociationMethod';
+    const CFG_GENERATE_FOREIGN_KEYS_FIELDS          = 'generateForeignKeysFields';
+    const CFG_USE_TIMESTAMPS                        = 'useTimestamps';
+    /**
+     * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::init()
+     */
+    protected function init()
+    {
+        parent::init();
+        $this->addConfigurations(array(
+            static::CFG_INDENTATION                   => 4,
+            static::CFG_USE_SEMICOLONS                => true,
+            static::CFG_GENERATE_ASSOCIATION_METHOD   => false,
+            static::CFG_GENERATE_FOREIGN_KEYS_FIELDS  => true,
+            static::CFG_USE_TIMESTAMPS                => false
+        ));
+    }
+
     /**
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()

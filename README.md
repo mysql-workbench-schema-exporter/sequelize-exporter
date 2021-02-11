@@ -26,9 +26,50 @@ You then can invoke the CLI script using `vendor/bin/mysql-workbench-schema-expo
 
 Additionally to the [common options](https://github.com/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter#configuring-mysql-workbench-schema-exporter) of mysql-workbench-schema-exporter these options are supported:
 
-### Sequelize Model
+### Sequelize 5
 
 Currently, no special options can be configured for Sequelize Model.
+
+### Sequelize 6
+
+  * `useSemicolons`
+
+    Whether or not to add semicolons to ends of lines (standard Eslint compliance).
+
+    Default is `true`.
+  
+  * `generateAssociationMethod`
+
+    Generate an association method to define associations between models.
+
+    You may instantiate your model this way :
+
+    ```javascript
+    const Sequelize = require('sequelize');
+
+    const sequelize = new Sequelize({...});
+    const MyModel1 = sequelize.import('./path/to/MyModel');
+    const MyModel2 = sequelize.import('./path/to/MyMode2');
+    ...
+
+    MyModel1.associate();
+    MyModel2.associate();
+    ...
+
+    ```
+    Default is `false`.
+
+  * `generateForeignKeysFields`
+
+    Whether or not to generate foreign keys fields and indexes. You could want to delegate it to association method (one could experiment relations creation order problems when it is present).
+
+    Default is `true`.
+
+  * `useTimestamps`
+
+    Sets the models `timestamps` property.
+
+    Default is `false`.
 
 ## Command Line Interface (CLI)
 
@@ -38,7 +79,7 @@ See documentation for [mysql-workbench-schema-exporter](https://github.com/mysql
 
 ### Sequelize 5
 
-```
+```javascript
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize({...});
@@ -50,7 +91,7 @@ MyModel.findOne({...}).then((res) => {...});
 
 ### Sequelize 6
 
-```
+```javascript
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize({...});
