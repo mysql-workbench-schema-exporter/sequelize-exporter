@@ -61,7 +61,9 @@ Currently, no special options can be configured for Sequelize Model.
 
   * `generateForeignKeysFields`
 
-    Whether or not to generate foreign keys fields and indexes. You could want to delegate it to association method (one could experiment relations creation order problems when it is present).
+    Whether or not to generate foreign keys fields and indexes.
+    
+    You could want to delegate it to association method (one could experiment relations creation order problems when it is present).
 
     Default is `true`.
 
@@ -70,6 +72,80 @@ Currently, no special options can be configured for Sequelize Model.
     Sets the models `timestamps` property.
 
     Default is `false`.
+
+  * `injectExtendFunction`
+
+    Injects an `extend` functions to models in order to provide extra definitions whitout modifying generated model files (and thus, being able to regenerate models).
+
+    Example :
+
+    **`User.js`**
+    ```javascript
+    const { DataTypes, Model } = require('sequelize')
+
+    class User extends Model {
+    }
+
+    module.exports = (sequelize, extend) => {
+      User.init(extend({
+        ...
+        lastName: {
+          type: DataTypes.STRING(200),
+          field: 'name',
+          allowNull: false,
+          defaultValue: ''
+        },
+        firstName: {
+          ...
+        },
+        ...
+      }), {
+        ...
+      })
+
+      User.associate = () => {
+        ...
+      }
+
+      return User
+    }
+    ```
+
+    **`extensions/User.js`**
+    ```javascript
+    const deepmerge = require('deepmerge')
+    const { DataTypes } = require('sequelize')
+
+    module.exports = sequelize => function (baseDefinition) {
+      return deepmerge(baseDefinition, {
+        lastName: {
+          get() {
+            const rawValue = this.getDataValue('lastName');
+            return rawValue ? rawValue.toUpperCase() : null;
+          }
+        },
+        fullName: {
+          type: DataTypes.VIRTUAL(DataTypes.STRING, ['firstName', 'lastName']),
+          get() {
+            return `${this.firstName} ${this.lastName}`
+          },
+          set(value) {
+            throw new Error('Do not try to set the `fullName` value!')
+          }
+        }
+      }, { clone: false })
+    } 
+    ```
+
+    Initialization can be achieved like this :
+    ```javascript
+    const Sequelize = require('sequelize');
+
+    const sequelize = new Sequelize({...});
+    const extendUser = require('./path/to/extensions/User')(sequelize);
+    const User = require('./path/to/User')(sequelize, extendUser);
+    ...
+    ```
 
 ## Command Line Interface (CLI)
 

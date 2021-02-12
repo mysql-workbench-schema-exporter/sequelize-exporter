@@ -6,7 +6,7 @@
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
  * Copyright (c) 2012-2020 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
- * Copyright (c) 2021 Molaux <marco@matlaux.net>
+ * Copyright (c) 2021 Marc-Olivier Laux <marco@matlaux.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,7 @@ class Table extends BaseTable
     protected function writeBody(WriterInterface $writer)
     {
         $semicolon = $this->getConfig()->get(Formatter::CFG_USE_SEMICOLONS) ? ';' : '';
+
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
                 if ($_this->getConfig()->get(Formatter::CFG_ADD_COMMENT)) {
@@ -100,7 +101,7 @@ class Table extends BaseTable
             ->write("class %s extends Model {", $this->getModelName())
             ->write("}")
             ->write("")
-            ->write("module.exports = (sequelize) => {")
+            ->write("module.exports = (sequelize%s) => {", $this->getConfig()->get(Formatter::CFG_INJECT_EXTEND_FUNCTION) ? ", extend" : "")
             ->indent()
                 ->write("%s.init(%s, %s)$semicolon", $this->getModelName(), $this->asModel(), $this->asOptions())
                 ->write("")
@@ -118,7 +119,6 @@ class Table extends BaseTable
                         ;
                     }
                 })
-                
                 ->write("return %s$semicolon", $this->getModelName())
             ->outdent()
             ->write("}")
@@ -147,8 +147,10 @@ class Table extends BaseTable
     protected function asModel()
     {
         $result = $this->getFields();
-
-        return $this->getJSObject($result);
+        $modelDefinition = $this->getJSObject($result);
+        return $this->getConfig()->get(Formatter::CFG_INJECT_EXTEND_FUNCTION)
+            ? sprintf("extend(%s)", $modelDefinition)
+            : $modelDefinition;
     }
 
     /**
@@ -235,6 +237,7 @@ class Table extends BaseTable
     protected function writeAssociations(WriterInterface $writer)
     {
         $semicolon = $this->getConfig()->get(Formatter::CFG_USE_SEMICOLONS) ? ';' : '';
+
         // 1 <=> N references
         $firstAssociation = true;
         foreach ($this->getAllLocalForeignKeys() as $k => $local) {
@@ -248,6 +251,7 @@ class Table extends BaseTable
             $relatedColumnName = $local->getForeignM2MRelatedName();
             $foreignColumnName = $local->getForeign()->getColumnName();
             $as = "";
+
             if ($relatedColumnName) {
                 $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
                 $as = $this->getNaming(sprintf('as_%s_%s',
@@ -285,6 +289,7 @@ class Table extends BaseTable
                 $comment = '// 1 <=> 1 association';
                 $associationMethod = 'hasOne';
             }
+
             $writer
                 ->writeIf(!$firstAssociation, '')
                 ->write($comment)
@@ -293,6 +298,7 @@ class Table extends BaseTable
                     $associationMethod,
                     $local->getOwningTable()->getModelName(),
                     $this->getJSObject($options));
+
             $firstAssociation = false;
         }
 
@@ -309,6 +315,7 @@ class Table extends BaseTable
             $relatedColumnName = $foreign->getLocal()->getColumnName();
             $as = null;
             $foreignColumnName = $foreign->getForeign()->getColumnName();
+
             if ($relatedColumnName) {
                 $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
                 $as = $this->getNaming($relatedAlias, null, true);
@@ -316,6 +323,7 @@ class Table extends BaseTable
                     $as = null;
                 }
             }
+
             $options = array(
                 'foreignKey'    => array(
                     'name'          => $this->getNaming($foreign->getLocal()->getColumnName()),
@@ -337,6 +345,7 @@ class Table extends BaseTable
                 $this->getDocument()->addLog('  Relation considered as "1 <=> 1"');
                 $comment = '// 1 <=> 1 association';
             }
+
             $writer
                 ->writeIf(!$firstAssociation, '')
                 ->write($comment)
@@ -345,6 +354,7 @@ class Table extends BaseTable
                     $associationMethod,
                     $foreign->getReferencedTable()->getModelName(),
                     $this->getJSObject($options));
+
             $firstAssociation = false;
         }
 
@@ -388,13 +398,23 @@ class Table extends BaseTable
         return $code ? sprintf('%s', $column) : sprintf('related by `%s`', $column);
     }
 
-    public function getNaming($name, $strategy = null, $isModel = false) {
+    /**
+     * Override inherited getNaming : when camel cased, model aliases have to begin by a upper cased character
+     *
+     * @param string $name
+     * @param string $strategy
+     * @param bool $isModel 
+     * @return string
+     */
+    public function getNaming($name, $strategy = null, $isModel = false)
+    {
         if (!$strategy) {
             $strategy = $this->getConfig()->get(FormatterInterface::CFG_NAMING_STRATEGY);
             if ($strategy === FormatterInterface::NAMING_CAMEL_CASE && $isModel) {
                 $strategy = FormatterInterface::NAMING_PASCAL_CASE;
             }
         }
+
         return parent::getNaming($name, $strategy);
     }
 }
