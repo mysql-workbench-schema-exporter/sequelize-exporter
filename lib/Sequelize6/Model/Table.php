@@ -218,9 +218,14 @@ class Table extends BaseTable
     {
         $result = [];
         foreach ($this->getIndices() as $index) {
-            if ($this->getConfig()->get(Formatter::CFG_GENERATE_FOREIGN_KEYS_FIELDS) || !array_reduce($index->getColumns(), function ($isForeignIndex, $column) {
+            $isForeignIndex = array_reduce($index->getColumns(), function ($isForeignIndex, $column) {
                 return $isForeignIndex || count($column->getForeignKeys()) > 0;
-            }, false)) {
+            }, false);
+
+            // Create foreign index if its essociated field or association is generated
+            if ($this->getConfig()->get(Formatter::CFG_GENERATE_FOREIGN_KEYS_FIELDS) ||
+                $this->getConfig()->get(Formatter::CFG_GENERATE_ASSOCIATION_METHOD) ||
+                !$isForeignIndex) {
                 if ($index->isIndex() || $index->isUnique()) {
                     $result[] = [
                         'name' => $index->getName(),

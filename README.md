@@ -61,9 +61,9 @@ Currently, no special options can be configured for Sequelize Model.
 
   * `generateForeignKeysFields`
 
-    Whether or not to generate foreign keys fields and indexes.
+    Whether or not to generate foreign keys fields.
     
-    You could want to delegate it to association method (one could experiment relations creation order problems when it is present).
+    You could want to delegate it to association method (one could experiment relations creation order problems when foreign key field is present in definition).
 
     Default is `true`.
 
