@@ -189,9 +189,14 @@ class Table extends BaseTable
                 $c['allowNull'] = false;
             }
             if ($column->getDefaultValue()) {
-                $c['defaultValue'] = $this->getJSObject($column->getDefaultValue(), true, $type !== 'DATE');
-                if ($type === 'BOOLEAN') {
-                    $c['defaultValue'] = (bool) $c['defaultValue'];
+                if ($type === 'DATE') {
+                    $c['defaultValue'] = substr($column->getDefaultValue(), -1) === ')'
+                        ? $this->getJSObject(sprintf("sequelize.fn('%s')", substr($column->getDefaultValue(), 0, -2)), false, true)
+                        : $this->getJSObject(sprintf("sequelize.literal('%s')", $column->getDefaultValue()), false, true);
+                } else if ($type === 'BOOLEAN') {
+                    $c['defaultValue'] = (bool) $this->getJSObject($column->getDefaultValue(), true, true);
+                } else {
+                    $c['defaultValue'] = $this->getJSObject($column->getDefaultValue(), true, true);
                 }
             }
 
