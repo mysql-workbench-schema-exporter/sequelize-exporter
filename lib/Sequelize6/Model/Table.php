@@ -243,7 +243,7 @@ class Table extends BaseTable
     }
 
     protected function getConstraints() {
-        $constraints;
+        $constraints = array();
         foreach ($this->getAllLocalForeignKeys() as $k => $local) {
             if (!$this->isLocalForeignKeyIgnored($local)) {
                 $model = $local->getOwningTable()->getModelName();
