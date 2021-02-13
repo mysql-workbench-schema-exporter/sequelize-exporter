@@ -242,9 +242,37 @@ class Table extends BaseTable
         return $result;
     }
 
+    protected function getConstraints() {
+        $constraints;
+        foreach ($this->getAllLocalForeignKeys() as $k => $local) {
+            if (!$this->isLocalForeignKeyIgnored($local)) {
+                $model = $local->getOwningTable()->getModelName();
+                if (!isset($constraints[$model])) {
+                    $constraints[$model] = 1;
+                } else {
+                    $constraints[$model]++;
+                }
+            }
+        }
+        foreach ($this->getAllForeignKeys() as $k => $foreign) {
+            if (!$this->isForeignKeyIgnored($foreign)) {
+                $model = $foreign->getReferencedTable()->getModelName();
+                if (!isset($constraints[$model])) {
+                    $constraints[$model] = 1;
+                } else {
+                    $constraints[$model]++;
+                }
+            }
+        }
+        return array_map(function ($count) {
+            return $count > 1 ? false : true;
+        }, $constraints);
+    }
+
     protected function writeAssociations(WriterInterface $writer)
     {
         $semicolon = $this->getConfig()->get(Formatter::CFG_USE_SEMICOLONS) ? ';' : '';
+        $constraints = $this->getConstraints();
 
         // 1 <=> N references
         $firstAssociation = true;
@@ -256,11 +284,15 @@ class Table extends BaseTable
 
             $targetEntity = $local->getOwningTable()->getModelName();
             $mappedBy = $local->getReferencedTable()->getModelName();
-            $relatedColumnName = $local->getForeignM2MRelatedName();
+            $relatedColumnName = $local->getLocal()->getColumnName();
             $foreignColumnName = $local->getForeign()->getColumnName();
             $as = "";
 
+            
+
             if ($relatedColumnName) {
+                // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%" 
+                // or "%foreign_col%_%alias%"
                 $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
                 $as = $this->getNaming(sprintf('as_%s_%s',
                     $relatedAlias,
@@ -269,7 +301,7 @@ class Table extends BaseTable
                 $as = $this->getNaming($local->getOwningTable()->getModelName(), null, true);
             }
 
-            if ($as === "" || $as === $local->getOwningTable()->getModelName()) {
+            if ($as === "" || $as === $local->getOwningTable()->getModelName() || $relatedAlias === $foreignColumnName) {
                 $as = null;
             }
 
@@ -278,10 +310,14 @@ class Table extends BaseTable
                     'name'          => $this->getNaming($local->getLocal()->getColumnName()),
                     'allowNull'     => !$local->getLocal()->isNotNull(),
                 ),
-                'onUpdate'      => $local->getParameter('updateRule'),
-                'onDelete'      => $local->getParameter('deleteRule'),
+                // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
+                'onUpdate'      => $constraints[$local->getOwningTable()->getModelName()] === false ?null : $local->getParameter('updateRule'),
+                // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
+                'onDelete'      => $constraints[$local->getOwningTable()->getModelName()] === false ?null : $local->getParameter('deleteRule'),
                 'tarketKey'     => $this->getNaming($local->getForeign()->getColumnName()),
-                'as'            => $as
+                'as'            => $as,
+                // @see https://sequelize.org/master/manual/constraints-and-circularities.html
+                'constraints'   => $constraints[$local->getOwningTable()->getModelName()] === false ? false : null
             );
 
             $associationMethod = null;
@@ -325,9 +361,14 @@ class Table extends BaseTable
             $foreignColumnName = $foreign->getForeign()->getColumnName();
 
             if ($relatedColumnName) {
+                // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%" 
+                // or "%foreign_col%_%alias%"
                 $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
+
                 $as = $this->getNaming($relatedAlias, null, true);
-                if ($as === $foreign->getReferencedTable()->getModelName()) {
+
+                // If alias is the same as foreign model, don't use it
+                if ($as === $foreign->getReferencedTable()->getModelName() || $relatedAlias === $foreignColumnName) {
                     $as = null;
                 }
             }
@@ -337,10 +378,14 @@ class Table extends BaseTable
                     'name'          => $this->getNaming($foreign->getLocal()->getColumnName()),
                     'allowNull'     => !$foreign->getLocal()->isNotNull(),
                 ),
-                'onUpdate'      => $foreign->getParameter('updateRule'),
-                'onDelete'      => $foreign->getParameter('deleteRule'),
+                // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
+                'onUpdate'      => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('updateRule'),
+                // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
+                'onUpdate'      => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('deleteRule'),
                 'tarketKey'     => $this->getNaming($foreign->getForeign()->getColumnName()),
-                'as'            => $as
+                'as'            => $as,
+                // @see https://sequelize.org/master/manual/constraints-and-circularities.html
+                'constraints'   => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? false : null
             );
 
             $associationMethod = 'belongsTo';
