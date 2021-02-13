@@ -169,13 +169,16 @@ class Table extends BaseTable
             }
 
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
-            if (DatatypeConverterInterface::DATATYPE_DECIMAL == $column->getColumnType()) {
+            if (DatatypeConverterInterface::DATATYPE_ENUM == $column->getColumnType()) {
+                $type .= $column->getParameters()->get("datatypeExplicitParams");
+            } elseif (DatatypeConverterInterface::DATATYPE_DECIMAL == $column->getColumnType()) {
                 $type .= sprintf('(%s, %s)', $column->getParameters()->get('precision'), $column->getParameters()->get('scale'));
             } elseif (($len = $column->getLength()) > 0) {
                 $type .= sprintf('(%s)', $len);
             }
             $c = [];
             $c['type'] = $this->getJSObject(sprintf('DataTypes.%s', $type ? $type : 'STRING.BINARY'), true, true);
+            
             $c['field'] = $column->getColumnName();
             if ($column->isPrimary()) {
                 $c['primaryKey'] = true;
@@ -186,7 +189,7 @@ class Table extends BaseTable
                 $c['allowNull'] = false;
             }
             if ($column->getDefaultValue()) {
-                $c['defaultValue'] = $this->getJSObject($column->getDefaultValue(), true, true);
+                $c['defaultValue'] = $this->getJSObject($column->getDefaultValue(), true, $type !== 'DATE');
                 if ($type === 'BOOLEAN') {
                     $c['defaultValue'] = (bool) $c['defaultValue'];
                 }
