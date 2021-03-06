@@ -319,7 +319,7 @@ class Table extends BaseTable
                 'onUpdate'      => $constraints[$local->getOwningTable()->getModelName()] === false ?null : $local->getParameter('updateRule'),
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
                 'onDelete'      => $constraints[$local->getOwningTable()->getModelName()] === false ?null : $local->getParameter('deleteRule'),
-                'tarketKey'     => $this->getNaming($local->getForeign()->getColumnName()),
+                'targetKey'     => $this->getNaming($local->getForeign()->getColumnName()),
                 'as'            => $as,
                 // @see https://sequelize.org/master/manual/constraints-and-circularities.html
                 'constraints'   => $constraints[$local->getOwningTable()->getModelName()] === false ? false : null
@@ -387,7 +387,7 @@ class Table extends BaseTable
                 'onUpdate'      => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('updateRule'),
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
                 'onUpdate'      => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('deleteRule'),
-                'tarketKey'     => $this->getNaming($foreign->getForeign()->getColumnName()),
+                'targetKey'     => $this->getNaming($foreign->getForeign()->getColumnName()),
                 'as'            => $as,
                 // @see https://sequelize.org/master/manual/constraints-and-circularities.html
                 'constraints'   => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? false : null
@@ -427,7 +427,7 @@ class Table extends BaseTable
                 ),
                 'onUpdate'      => $relation['reference']->getParameter('updateRule'),
                 'onDelete'      => $relation['reference']->getParameter('deleteRule'),
-                'tarketKey'     => $this->getNaming($relation['reference']->getForeign()->getColumnName()),
+                'targetKey'     => $this->getNaming($relation['target']->getLocal()->getColumnName()),
                 'as'            => $this->getNaming($relation['refTable']->getModelName(), null, true)
             );
 
@@ -441,6 +441,23 @@ class Table extends BaseTable
 
             $firstAssociation = false;
         }
+        return $this;
+    }
+
+    /**
+     * Inject a many to many relation into referenced table.
+     *
+     * @param \MwbExporter\Model\ForeignKey $fk1
+     * @param \MwbExporter\Model\ForeignKey $fk2
+     * @return \MwbExporter\Model\Table
+     */
+    protected function injectManyToMany(ForeignKey $fk1, ForeignKey $fk2)
+    {
+        $fk1->getReferencedTable()->setManyToManyRelation(array(
+            'reference' => $fk1,
+            'target'    => $fk2,
+            'refTable'  => $fk2->getReferencedTable()));
+
         return $this;
     }
 
