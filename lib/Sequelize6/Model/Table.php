@@ -299,14 +299,20 @@ class Table extends BaseTable
                 // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%" 
                 // or "%foreign_col%_%alias%"
                 $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
-                $as = $this->getNaming(sprintf('as_%s_%s',
-                    $relatedAlias,
-                    $local->getOwningTable()->getModelName()), null, true);
+
+                if ($relatedAlias !== $foreignColumnName) {
+                    $as = $this->pluralize($this->getNaming(sprintf('%s_%s_%s',
+                        $relatedAlias,
+                        $mappedBy,
+                        $local->getOwningTable()->getModelName()), null, true));
+                } else {
+                    $as = $this->pluralize($this->getNaming($local->getOwningTable()->getModelName(), null, true));
+                }
             } else {
-                $as = $this->getNaming($local->getOwningTable()->getModelName(), null, true);
+                $as = $this->pluralize($this->getNaming($local->getOwningTable()->getModelName(), null, true));
             }
 
-            if ($as === "" || $as === $local->getOwningTable()->getModelName() || $relatedAlias === $foreignColumnName) {
+            if ($as === "" || $as === $local->getOwningTable()->getModelName()) {
                 $as = null;
             }
 
@@ -370,10 +376,18 @@ class Table extends BaseTable
                 // or "%foreign_col%_%alias%"
                 $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
 
+                if ($relatedAlias === $foreignColumnName) {
+                    $relatedAlias = $foreign->getReferencedTable()->getModelName();
+                } else {
+                    $relatedAlias = sprintf("%s_%s",
+                        $relatedAlias,
+                        $foreign->getReferencedTable()->getModelName());
+                }
+
                 $as = $this->getNaming($relatedAlias, null, true);
 
                 // If alias is the same as foreign model, don't use it
-                if ($as === $foreign->getReferencedTable()->getModelName() || $relatedAlias === $foreignColumnName) {
+                if ($as === $foreign->getReferencedTable()->getModelName()) {
                     $as = null;
                 }
             }
@@ -428,7 +442,7 @@ class Table extends BaseTable
                 'onUpdate'      => $relation['reference']->getParameter('updateRule'),
                 'onDelete'      => $relation['reference']->getParameter('deleteRule'),
                 'targetKey'     => $this->getNaming($relation['target']->getLocal()->getColumnName()),
-                'as'            => $this->getNaming($relation['refTable']->getModelName(), null, true)
+                'as'            => $this->pluralize($this->getNaming($relation['refTable']->getModelName(), null, true))
             );
 
             $writer
