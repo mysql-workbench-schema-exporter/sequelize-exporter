@@ -441,7 +441,7 @@ class Table extends BaseTable
                 ),
                 'onUpdate'      => $relation['reference']->getParameter('updateRule'),
                 'onDelete'      => $relation['reference']->getParameter('deleteRule'),
-                'targetKey'     => $this->getNaming($relation['target']->getLocal()->getColumnName()),
+                'targetKey'     => $this->getNaming($relation['target']->getForeign()->getColumnName()),
                 'as'            => $this->pluralize($this->getNaming($relation['refTable']->getModelName(), null, true))
             );
 
