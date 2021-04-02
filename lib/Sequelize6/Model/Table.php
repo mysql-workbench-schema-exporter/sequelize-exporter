@@ -274,6 +274,24 @@ class Table extends BaseTable
         }, $constraints);
     }
 
+    public function extractForeignAlias($foreignColumnName, $targetTableName, $targetColumnName) {
+        // remove standard name
+        $relatedAlias = preg_replace(
+            "/(${targetTableName}_)?${targetColumnName}/",
+            '',
+            $foreignColumnName
+        );
+
+        // clean leading _
+        $relatedAlias = preg_replace(
+            "/(^_|_\$)/",
+            '',
+            $relatedAlias
+        );
+        
+        return $relatedAlias;
+    }
+
     protected function writeAssociations(WriterInterface $writer)
     {
         $semicolon = $this->getConfig()->get(Formatter::CFG_USE_SEMICOLONS) ? ';' : '';
@@ -289,18 +307,17 @@ class Table extends BaseTable
 
             $targetEntity = $local->getOwningTable()->getModelName();
             $mappedBy = $local->getReferencedTable()->getModelName();
+            $referencedTableName = $local->getReferencedTable()->getName();
             $relatedColumnName = $local->getLocal()->getColumnName();
             $foreignColumnName = $local->getForeign()->getColumnName();
             $as = "";
 
-            
-
             if ($relatedColumnName) {
-                // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%" 
-                // or "%foreign_col%_%alias%"
-                $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
+                // assumes multiple foreign keys to same model is formatted as "%alias%_(%foreign_table%_)?%foreign_col%" 
+                // or "(%foreign_table%_)?%foreign_col%_%alias%"
+                $relatedAlias = $this->extractForeignAlias($relatedColumnName, $referencedTableName, $foreignColumnName);
 
-                if ($relatedAlias !== $foreignColumnName) {
+                if ($relatedAlias) {
                     $as = $this->pluralize($this->getNaming(sprintf('%s_%s_%s',
                         $relatedAlias,
                         $mappedBy,
@@ -366,6 +383,7 @@ class Table extends BaseTable
 
             $targetEntity = $foreign->getReferencedTable()->getModelName();
             $targetEntityFQCN = $foreign->getReferencedTable()->getModelName();
+            $referencedTableName = $foreign->getReferencedTable()->getName();
             $inversedBy = $foreign->getOwningTable()->getModelName();
             $relatedColumnName = $foreign->getLocal()->getColumnName();
             $as = null;
@@ -374,9 +392,9 @@ class Table extends BaseTable
             if ($relatedColumnName) {
                 // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%" 
                 // or "%foreign_col%_%alias%"
-                $relatedAlias = preg_replace("/(^${foreignColumnName}_|_${foreignColumnName}\$)/", '', $relatedColumnName);
+                $relatedAlias = $this->extractForeignAlias($relatedColumnName, $referencedTableName, $foreignColumnName);
 
-                if ($relatedAlias === $foreignColumnName) {
+                if (!$relatedAlias) {
                     $relatedAlias = $foreign->getReferencedTable()->getModelName();
                 } else {
                     $relatedAlias = sprintf("%s_%s",
