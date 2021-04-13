@@ -183,6 +183,9 @@ class Table extends BaseTable
             if ($column->isPrimary()) {
                 $c['primaryKey'] = true;
             }
+            if ($column->isUnique()) {
+                $c['unique'] = true;
+            }
             if ($column->isAutoIncrement()) {
                 $c['autoIncrement'] = true;
             } elseif ($column->isNotNull()) {

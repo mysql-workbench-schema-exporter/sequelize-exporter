@@ -77,6 +77,15 @@ class Formatter extends BaseFormatter
 
     /**
      * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::createColumn()
+     */
+    public function createColumn(Base $parent, $node)
+    {
+        return new Model\Column($parent, $node);
+    }
+
+    /**
+     * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::getTitle()
      */
     public function getTitle()
