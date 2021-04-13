@@ -40,6 +40,13 @@ class Column extends BaseColumn
      */
     public function isUnique()
     {
-        return $this->isUnique;
+        if ($this->isUnique) {
+            foreach ($this->getTable()->getIndices() as $index) {
+                if ($index->isUnique() && count($index->getColumns()) === 1 && $index->getColumns()[0] === $this) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
