@@ -191,7 +191,7 @@ class Table extends BaseTable
             } elseif ($column->isNotNull()) {
                 $c['allowNull'] = false;
             }
-            if ($column->getDefaultValue()) {
+            if ($column->getDefaultValue() !== null) {
                 if ($type === 'DATE') {
                     $c['defaultValue'] = substr($column->getDefaultValue(), -1) === ')'
                         ? $this->getJSObject(sprintf("sequelize.fn('%s')", substr($column->getDefaultValue(), 0, -2)), false, true)
