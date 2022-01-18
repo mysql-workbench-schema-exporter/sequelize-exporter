@@ -23,6 +23,10 @@
 			"name" : "Robert Vock",
 			"email" : "robertvock82@gmail.com",
 			"role" : "Developer"
+		}, {
+			"name" : "Marc-Olivier Laux",
+			"email" : "marc-olivier@matlaux.net",
+			"role" : "Developer"
 		}
 	],
 	"require" : {
