@@ -96,19 +96,17 @@ class Table extends BaseTable
                     ;
                 }
             })
-            ->write("const { DataTypes, Model } = require('sequelize')$semicolon")
+            ->write("const { DataTypes } = require('sequelize')$semicolon")
             ->write("")
-            ->write("class %s extends Model {", $this->getModelName())
-            ->write("}")
             ->write("")
             ->write("module.exports = (sequelize%s) => {", $this->getConfig()->get(Formatter::CFG_INJECT_EXTEND_FUNCTION) ? ", extend" : "")
             ->indent()
-                ->write("%s.init(%s, %s)$semicolon", $this->getModelName(), $this->asModel(), $this->asOptions())
+                ->write("const Model = sequelize.define('%s', %s, %s)$semicolon", $this->getModelName(), $this->asModel(), $this->asOptions())
                 ->write("")
                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($semicolon) {
                     if ($_this->getConfig()->get(Formatter::CFG_GENERATE_ASSOCIATION_METHOD)) {
                         $writer
-                            ->write("%s.associate = () => {", $this->getModelName())
+                            ->write("Model.associate = () => {", $this->getModelName())
                             ->indent()
                                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
                                     $_this->writeASsociations($writer);
@@ -119,7 +117,7 @@ class Table extends BaseTable
                         ;
                     }
                 })
-                ->write("return %s$semicolon", $this->getModelName())
+                ->write("return Model$semicolon")
             ->outdent()
             ->write("}")
             ->write("")
@@ -369,7 +367,7 @@ class Table extends BaseTable
                 ->writeIf(!$firstAssociation, '')
                 ->write($comment)
                 ->write("%s.%s(sequelize.models.%s, %s)$semicolon", 
-                    $this->getModelName(),
+                    "Model",
                     $associationMethod,
                     $local->getOwningTable()->getModelName(),
                     $this->getJSObject($options));
@@ -443,7 +441,7 @@ class Table extends BaseTable
                 ->writeIf(!$firstAssociation, '')
                 ->write($comment)
                 ->write("%s.%s(sequelize.models.%s, %s)$semicolon", 
-                    $this->getModelName(),
+                    "Model",
                     $associationMethod,
                     $foreign->getReferencedTable()->getModelName(),
                     $this->getJSObject($options));
@@ -470,7 +468,7 @@ class Table extends BaseTable
                 ->writeIf(!$firstAssociation, '')
                 ->write('// N <=> M association')
                 ->write("%s.belongsToMany(sequelize.models.%s, %s)$semicolon",
-                    $this->getModelName(), 
+                    "Model", 
                     $relation['refTable']->getModelName(), 
                     $this->getJSObject($options));
 
