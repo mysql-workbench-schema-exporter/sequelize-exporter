@@ -195,7 +195,7 @@ class Table extends BaseTable
                         ? $this->getJSObject(sprintf("sequelize.fn('%s')", substr($column->getDefaultValue(), 0, -2)), false, true)
                         : $this->getJSObject(sprintf("sequelize.literal('%s')", $column->getDefaultValue()), false, true);
                 } else if ($type === 'BOOLEAN') {
-                    $c['defaultValue'] = (bool) $this->getJSObject($column->getDefaultValue(), true, true);
+                    $c['defaultValue'] = (bool) $this->getJSObject($column->getDefaultValue(), false, true)->__toString();
                 } else {
                     $c['defaultValue'] = $this->getJSObject($column->getDefaultValue(), true, true);
                 }
