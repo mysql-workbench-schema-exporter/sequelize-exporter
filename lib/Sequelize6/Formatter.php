@@ -40,9 +40,9 @@ class Formatter extends BaseFormatter
     protected function init()
     {
         parent::init();
-        $this->addConfigurations(array(
+        $this->addConfigurations([
             static::CFG_INDENTATION     => 4,
-        ));
+        ]);
     }
 
     /**
