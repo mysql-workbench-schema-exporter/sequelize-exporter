@@ -50,11 +50,11 @@ class Table extends BaseTable
         $indentation = $this->getConfig()->get(Formatter::CFG_USE_TABS) ? "\t" : ' ';
         $indentation = str_repeat($indentation, $this->getConfig()->get(Formatter::CFG_INDENTATION));
 
-        return new JS($content, array(
+        return new JS($content, [
             'multiline' => $multiline,
             'raw' => $raw,
             'indentation' => $indentation,
-        ));
+        ]);
     }
 
     public function writeTable(WriterInterface $writer)
@@ -103,13 +103,13 @@ class Table extends BaseTable
 
     protected function asOptions()
     {
-        $result = array(
+        $result = [
             'tableName' => $this->getRawTableName(),
             'indexes' => count($indexes = $this->getIndexes()) ? $indexes : null,
             'timestamps' => false,
             'underscored' => true,
             'syncOnAssociation' => false
-        );
+        ];
 
         return $this->getJSObject($result);
     }
@@ -128,7 +128,7 @@ class Table extends BaseTable
      */
     protected function getFields()
     {
-        $result = array();
+        $result = [];
         foreach ($this->getColumns() as $column)
         {
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
@@ -137,7 +137,7 @@ class Table extends BaseTable
             } elseif (($len = $column->getLength()) > 0) {
                 $type .= sprintf('(%s)', $len);
             }
-            $c = array();
+            $c = [];
             $c['type'] = $this->getJSObject(sprintf('DataTypes.%s', $type ? $type : 'STRING.BINARY'), true, true);
             if ($column->isPrimary()) {
                 $c['primaryKey'] = true;
@@ -155,14 +155,14 @@ class Table extends BaseTable
 
     protected function getIndexes()
     {
-        $result = array();
+        $result = [];
         foreach ($this->getIndices() as $index) {
             if ($index->isIndex() || $index->isUnique()) {
-                $result[] = array(
+                $result[] = [
                     'name' => $index->getName(),
                     'fields' => $this->getJSObject($index->getColumnNames(), false),
                     'unique' => $index->isUnique() ? true : null,
-                );
+                ];
             }
         }
 
