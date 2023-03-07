@@ -35,18 +35,6 @@ class Formatter extends BaseFormatter
 {
     /**
      * (non-PHPdoc)
-     * @see \MwbExporter\Formatter\Formatter::init()
-     */
-    protected function init()
-    {
-        parent::init();
-        $this->addConfigurations([
-            static::CFG_INDENTATION     => 4,
-        ]);
-    }
-
-    /**
-     * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
      */
     protected function createDatatypeConverter()

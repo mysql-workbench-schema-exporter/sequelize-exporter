@@ -46,6 +46,7 @@ class DatatypeConverter extends BaseDatatypeConverter
             static::DATATYPE_NCHAR              => 'STRING',
             static::DATATYPE_VARCHAR            => 'STRING',
             static::DATATYPE_NVARCHAR           => 'STRING',
+            static::DATATYPE_JSON               => 'JSON',
             static::DATATYPE_BINARY             => 'BLOB',
             static::DATATYPE_VARBINARY          => 'BLOB',
             static::DATATYPE_TINYTEXT           => 'TEXT(\'tiny\')',

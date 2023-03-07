@@ -28,13 +28,27 @@
 namespace MwbExporter\Formatter\Node;
 
 use MwbExporter\Formatter\Formatter as BaseFormatter;
-use MwbExporter\Model\Base;
 
 abstract class Formatter extends BaseFormatter
 {
+    const CFG_COMMON_TABLE_PROP = 'commonTableProp';
+
+    /**
+     * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::init()
+     */
+    protected function init()
+    {
+        parent::init();
+        $this->addConfigurations([
+            static::CFG_INDENTATION         => 4,
+            static::CFG_COMMON_TABLE_PROP   => '',
+        ]);
+    }
+
     public function getVersion()
     {
-        return '3.2.0';
+        return '3.2.1';
     }
 
     /**
@@ -49,5 +63,26 @@ abstract class Formatter extends BaseFormatter
     public function getFileExtension()
     {
         return 'js';
+    }
+
+    /**
+     * Get common table property.
+     *
+     * @return array
+     */
+    public function getTableProp()
+    {
+        $prop = [
+            'timestamps' => false,
+            'underscored' => false,
+            'syncOnAssociation' => false
+        ];
+        if (is_readable($filename = $this->getRegistry()->config->get(static::CFG_COMMON_TABLE_PROP))) {
+            if ($commonProp = json_decode(file_get_contents($filename), true)) {
+                $prop = array_merge($prop, $commonProp);
+            }
+        }
+
+        return $prop;
     }
 }
