@@ -103,13 +103,12 @@ class Table extends BaseTable
 
     protected function asOptions()
     {
-        $result = [
+        /** @var \MwbExporter\Formatter\Node\Formatter $formatter */
+        $formatter = $this->getFormatter();
+        $result = array_merge([
             'tableName' => $this->getRawTableName(),
             'indexes' => count($indexes = $this->getIndexes()) ? $indexes : null,
-            'timestamps' => false,
-            'underscored' => true,
-            'syncOnAssociation' => false
-        ];
+        ], $formatter->getTableProp());
 
         return $this->getJSObject($result);
     }

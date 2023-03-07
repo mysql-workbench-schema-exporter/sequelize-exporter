@@ -108,15 +108,14 @@ class Table extends BaseTable
 
     protected function asOptions()
     {
-        $result = [
+        /** @var \MwbExporter\Formatter\Node\Formatter $formatter */
+        $formatter = $this->getFormatter();
+        $result = array_merge([
             'sequelize' => $this->getJSObject('sequelize', false, true),
             'modelName' => $this->getModelName(),
             'tableName' => $this->getRawTableName(),
             'indexes' => count($indexes = $this->getIndexes()) ? $indexes : null,
-            'timestamps' => false,
-            'underscored' => true,
-            'syncOnAssociation' => false
-        ];
+        ], $formatter->getTableProp());
 
         return $this->getJSObject($result);
     }

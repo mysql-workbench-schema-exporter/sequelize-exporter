@@ -20,6 +20,7 @@
         "enhanceManyToManyDetection": true,
         "skipManyToManyTables": true,
         "stripMultipleUnderscores": false,
-        "asIsUserDatatypePrefix": ""
+        "asIsUserDatatypePrefix": "",
+        "commonTableProp": "prop.json"
     }
 }
