@@ -74,7 +74,7 @@ abstract class Formatter extends BaseFormatter
     {
         $prop = [
             'timestamps' => false,
-            'underscored' => false,
+            'underscored' => true,
             'syncOnAssociation' => false
         ];
         if (is_readable($filename = $this->getRegistry()->config->get(static::CFG_COMMON_TABLE_PROP))) {

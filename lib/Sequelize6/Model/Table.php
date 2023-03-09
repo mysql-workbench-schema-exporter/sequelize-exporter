@@ -337,6 +337,7 @@ class Table extends BaseTable
             $options = array(
                 'foreignKey'    => array(
                     'name'          => $this->getNaming($local->getLocal()->getColumnName()),
+                    'field'         => $local->getLocal()->getColumnName(),
                     'allowNull'     => !$local->getLocal()->isNotNull(),
                 ),
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
@@ -414,6 +415,7 @@ class Table extends BaseTable
             $options = array(
                 'foreignKey'    => array(
                     'name'          => $this->getNaming($foreign->getLocal()->getColumnName()),
+                    'field'         => $foreign->getLocal()->getColumnName(),
                     'allowNull'     => !$foreign->getLocal()->isNotNull(),
                 ),
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
@@ -456,7 +458,7 @@ class Table extends BaseTable
             $options = array(
                 'through'       => $relation['reference']->getOwningTable()->getRawTableName(),
                 'foreignKey'    => array(
-                    'name'          => $relation['reference']->getLocal()->getColumnName(),
+                    'name'          => $relation['reference']->getLocal()->getColumnName()
                 ),
                 'onUpdate'      => $relation['reference']->getParameter('updateRule'),
                 'onDelete'      => $relation['reference']->getParameter('deleteRule'),
