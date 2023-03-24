@@ -33,6 +33,27 @@ use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
 {
+
+    const CFG_USE_SEMICOLON                         = 'useSemicolon';
+    const CFG_GENERATE_ASSOCIATION_METHOD           = 'generateAssociationMethod';
+    const CFG_GENERATE_FOREIGN_KEYS_FIELDS          = 'generateForeignKeysFields';
+    const CFG_INJECT_EXTEND_FUNCTION                = 'injectExtendFunction';
+
+    /**
+     * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::init()
+     */
+    protected function init()
+    {
+        parent::init();
+        $this->addConfigurations([
+            static::CFG_USE_SEMICOLON                 => true,
+            static::CFG_GENERATE_ASSOCIATION_METHOD   => false,
+            static::CFG_GENERATE_FOREIGN_KEYS_FIELDS  => true,
+            static::CFG_INJECT_EXTEND_FUNCTION        => false,
+        ]);
+    }
+
     /**
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
@@ -49,6 +70,15 @@ class Formatter extends BaseFormatter
     public function createTable(Base $parent, $node)
     {
         return new Model\Table($parent, $node);
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::createColumn()
+     */
+    public function createColumn(Base $parent, $node)
+    {
+        return new Model\Column($parent, $node);
     }
 
     /**

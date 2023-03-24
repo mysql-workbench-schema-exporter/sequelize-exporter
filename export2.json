@@ -21,6 +21,10 @@
         "skipManyToManyTables": true,
         "stripMultipleUnderscores": false,
         "asIsUserDatatypePrefix": "",
-        "commonTableProp": "prop.json"
+        "commonTableProp": "prop.json",
+        "useSemicolon": true,
+        "generateAssociationMethod": true,
+        "generateForeignKeysFields": true,
+        "injectExtendFunction": true
     }
 }
