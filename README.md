@@ -26,6 +26,14 @@ You then can invoke the CLI script using `vendor/bin/mysql-workbench-schema-expo
 
 Additionally to the [common options](https://github.com/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter#configuring-mysql-workbench-schema-exporter) of mysql-workbench-schema-exporter these options are supported:
 
+### Common Setup
+
+  * `commonTableProp`
+
+    Provides a JSON file used as table options override. Default table options is `{timestamps: false, underscored: false, syncOnAssociation: false}`.
+
+    Default is blank.
+
 ### Sequelize 5
 
 Currently, no special options can be configured for Sequelize Model.
