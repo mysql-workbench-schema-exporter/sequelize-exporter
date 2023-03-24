@@ -77,75 +77,89 @@ Currently, no special options can be configured for Sequelize Model.
 
   * `injectExtendFunction`
 
-    Injects an `extend` functions to models in order to provide extra definitions whitout modifying generated model files (and thus, being able to regenerate models).
+    Allow table attributes and options to be extended in a such ways to provide extra definitions without modifying generated model files (and thus, being able to regenerate models).
 
-    Example :
+    Example:
 
-    **`User.js`**
+    **`User.js` (generated)**
+
     ```javascript
-    const { DataTypes, Model } = require('sequelize')
+    const { DataTypes } = require('sequelize');
 
-    class User extends Model {
-    }
+    module.exports = (sequelize, attrCallback, optCallback) => {
+        let attributes = {
+            lastName: {
+                type: DataTypes.STRING(200),
+                field: 'name',
+                allowNull: false,
+                defaultValue: ''
+            },
+            firstName: {
+                ...
+            },
+            ...
+        }
+        let options = {
+            ...
+        }
+        if (typeof attrCallback === 'function') {
+            attributes = attrCallback(attributes);
+        }
+        if (typeof optCallback === 'function') {
+            options = optCallback(options);
+        }
+        const Model = sequelize.define('User', attributes, options);
 
-    module.exports = (sequelize, extend) => {
-      User.init(extend({
-        ...
-        lastName: {
-          type: DataTypes.STRING(200),
-          field: 'name',
-          allowNull: false,
-          defaultValue: ''
-        },
-        firstName: {
-          ...
-        },
-        ...
-      }), {
-        ...
-      })
+        Model.associate = () => {
+            ...
+        }
 
-      User.associate = () => {
-        ...
-      }
-
-      return User
+        return Model;
     }
     ```
 
-    **`extensions/User.js`**
-    ```javascript
-    const deepmerge = require('deepmerge')
-    const { DataTypes } = require('sequelize')
+    **`extensions/User.js` (manually created)**
 
-    module.exports = sequelize => function (baseDefinition) {
-      return deepmerge(baseDefinition, {
-        lastName: {
-          get() {
-            const rawValue = this.getDataValue('lastName');
-            return rawValue ? rawValue.toUpperCase() : null;
-          }
-        },
-        fullName: {
-          type: DataTypes.VIRTUAL(DataTypes.STRING, ['firstName', 'lastName']),
-          get() {
-            return `${this.firstName} ${this.lastName}`
-          },
-          set(value) {
-            throw new Error('Do not try to set the `fullName` value!')
-          }
-        }
-      }, { clone: false })
+    ```javascript
+    const { DataTypes } = require('sequelize');
+
+    module.exports = sequelize => attributes => {
+        return Object.assign(attributes, {
+            lastName: {
+                get() {
+                    const rawValue = this.getDataValue('lastName');
+                    return rawValue ? rawValue.toUpperCase() : null;
+                }
+            },
+            fullName: {
+                type: DataTypes.VIRTUAL,
+                get() {
+                    return `${this.firstName} ${this.lastName}`
+                },
+                set(value) {
+                    throw new Error('Do not try to set the `fullName` value!')
+                }
+            }
+        });
     } 
     ```
 
-    Initialization can be achieved like this :
+    Initialization can be achieved like this:
+
     ```javascript
     const Sequelize = require('sequelize');
 
     const sequelize = new Sequelize({...});
-    const extendUser = require('./path/to/extensions/User')(sequelize);
-    const User = require('./path/to/User')(sequelize, extendUser);
+    const userExtension = require('./path/to/extensions/User')(sequelize);
+    const User = require('./path/to/User')(sequelize, userExtension, options => {
+        return Object.assign(options, {
+            hooks: {
+                beforeCreate: (instance, options) => {
+                    ...
+                }
+            }
+        });
+    });
     ...
     ```
 
