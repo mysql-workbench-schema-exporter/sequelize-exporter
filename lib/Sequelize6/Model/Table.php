@@ -206,7 +206,7 @@ class Table extends BaseTable
                 $c['references'] = [];
                 /** @var \MwbExporter\Model\ForeignKey $foreignKey */
                 foreach ($column->getForeignKeys() as $foreignKey) {
-                    $c['references']['model'] = $foreignKey->getReferencedTable()->getModelName();
+                    $c['references']['model'] = $foreignKey->getReferencedTable()->getRawTableName();
                     $c['references']['key'] = $this->getNaming($foreignKey->getForeign()->getColumnName());
                     if ($onUpdate = $foreignKey->getParameter('updateRule'))
                     {
