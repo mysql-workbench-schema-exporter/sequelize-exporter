@@ -174,7 +174,10 @@ class Table extends BaseTable
             }
 
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
-            if (DatatypeConverterInterface::DATATYPE_ENUM == $column->getColumnType()) {
+            // convert tinyint(1) to boolean
+            if (DatatypeConverterInterface::DATATYPE_TINYINT == $column->getColumnType() && $column->getParameters()->get('precision') == 1) {
+                $type = 'BOOLEAN';
+            } elseif (DatatypeConverterInterface::DATATYPE_ENUM == $column->getColumnType()) {
                 $type .= $column->getParameters()->get("datatypeExplicitParams");
             } elseif (DatatypeConverterInterface::DATATYPE_DECIMAL == $column->getColumnType()) {
                 $type .= sprintf('(%s, %s)', $column->getParameters()->get('precision'), $column->getParameters()->get('scale'));
