@@ -41,7 +41,7 @@ class Extendable extends Configuration
 {
     protected function initialize()
     {
-        $this->category = 'sequelize6Configuration';
+        $this->category = 'sequelizeConfiguration';
         $this->defaultValue = true;
     }
 }

@@ -30,6 +30,7 @@
 namespace MwbExporter\Formatter\Node\Sequelize6\Model;
 
 use MwbExporter\Configuration\Comment as CommentConfiguration;
+use MwbExporter\Configuration\Header as HeaderConfiguration;
 use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Configuration\NamingStrategy as NamingStrategyConfiguration;
@@ -95,6 +96,14 @@ class Table extends BaseTable
 
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
+                /** @var \MwbExporter\Configuration\Header $header */
+                $header = $_this->getConfig(HeaderConfiguration::class);
+                if ($content = $header->getHeader()) {
+                    $writer
+                        ->write($_this->getFormatter()->getFormattedComment($content, Comment::FORMAT_JS))
+                        ->write('')
+                    ;
+                }
                 if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
                     $writer
                         ->write($_this->getFormatter()->getComment(Comment::FORMAT_JS))
