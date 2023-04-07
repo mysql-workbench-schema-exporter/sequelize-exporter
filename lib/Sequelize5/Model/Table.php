@@ -90,7 +90,7 @@ class Table extends BaseTable
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
                     $writer
-                        ->write($_this->getFormatter()->getFormattedComment($content, Comment::FORMAT_JS))
+                        ->write($_this->getFormatter()->getFormattedComment($content, Comment::FORMAT_JS, null))
                         ->write('')
                     ;
                 }
