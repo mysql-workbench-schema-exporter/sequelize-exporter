@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,17 +28,15 @@
 
 namespace MwbExporter\Formatter\Node\Sequelize6;
 
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\Extendable as ExtendableConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\ForeignKey as ForeignKeyConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Formatter\Node\Formatter as BaseFormatter;
 use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
 {
-
-    const CFG_USE_SEMICOLON                         = 'useSemicolon';
-    const CFG_GENERATE_ASSOCIATION_METHOD           = 'generateAssociationMethod';
-    const CFG_GENERATE_FOREIGN_KEYS_FIELDS          = 'generateForeignKeysFields';
-    const CFG_INJECT_EXTEND_FUNCTION                = 'injectExtendFunction';
-
     /**
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::init()
@@ -46,12 +44,12 @@ class Formatter extends BaseFormatter
     protected function init()
     {
         parent::init();
-        $this->addConfigurations([
-            static::CFG_USE_SEMICOLON                 => true,
-            static::CFG_GENERATE_ASSOCIATION_METHOD   => false,
-            static::CFG_GENERATE_FOREIGN_KEYS_FIELDS  => true,
-            static::CFG_INJECT_EXTEND_FUNCTION        => false,
-        ]);
+        $this->getConfigurations()
+            ->add(new SemiColonConfiguration())
+            ->add(new ForeignKeyConfiguration())
+            ->add(new AssociationConfiguration())
+            ->add(new ExtendableConfiguration())
+        ;
     }
 
     /**

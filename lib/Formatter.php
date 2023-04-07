@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2014 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,12 @@
 
 namespace MwbExporter\Formatter\Node;
 
+use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Formatter\Formatter as BaseFormatter;
+use MwbExporter\Formatter\Node\Configuration\TableProp as TablePropConfiguration;
 
 abstract class Formatter extends BaseFormatter
 {
-    const CFG_COMMON_TABLE_PROP = 'commonTableProp';
-
     /**
      * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::init()
@@ -40,10 +40,10 @@ abstract class Formatter extends BaseFormatter
     protected function init()
     {
         parent::init();
-        $this->addConfigurations([
-            static::CFG_INDENTATION         => 4,
-            static::CFG_COMMON_TABLE_PROP   => '',
-        ]);
+        $this->getConfigurations()
+            ->add(new TablePropConfiguration())
+            ->merge([IndentationConfiguration::class => 4])
+        ;
     }
 
     public function getVersion()
@@ -77,7 +77,7 @@ abstract class Formatter extends BaseFormatter
             'underscored' => false,
             'syncOnAssociation' => false
         ];
-        if (is_readable($filename = $this->getRegistry()->config->get(static::CFG_COMMON_TABLE_PROP))) {
+        if (is_readable($filename = $this->getConfig(TablePropConfiguration::class)->getValue())) {
             if ($commonProp = json_decode(file_get_contents($filename), true)) {
                 $prop = array_merge($prop, $commonProp);
             }

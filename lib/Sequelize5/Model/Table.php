@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2014 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,12 +28,14 @@
 
 namespace MwbExporter\Formatter\Node\Sequelize5\Model;
 
-use MwbExporter\Model\Table as BaseTable;
-use MwbExporter\Formatter\Node\Sequelize5\Formatter;
-use MwbExporter\Writer\WriterInterface;
-use MwbExporter\Object\JS;
-use MwbExporter\Helper\Comment;
+use MwbExporter\Configuration\Comment as CommentConfiguration;
+use MwbExporter\Configuration\Indentation as IndentationConfiguration;
+use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
+use MwbExporter\Helper\Comment;
+use MwbExporter\Model\Table as BaseTable;
+use MwbExporter\Object\JS;
+use MwbExporter\Writer\WriterInterface;
 
 class Table extends BaseTable
 {
@@ -47,13 +49,13 @@ class Table extends BaseTable
      */
     public function getJSObject($content, $multiline = true, $raw = false)
     {
-        $indentation = $this->getConfig()->get(Formatter::CFG_USE_TABS) ? "\t" : ' ';
-        $indentation = str_repeat($indentation, $this->getConfig()->get(Formatter::CFG_INDENTATION));
+        /** @var \MwbExporter\Configuration\Indentation $indentation */
+        $indentation = $this->getConfig(IndentationConfiguration::class);
 
         return new JS($content, [
+            'indentation' => $indentation->getIndentation(1),
             'multiline' => $multiline,
             'raw' => $raw,
-            'indentation' => $indentation,
         ]);
     }
 
@@ -62,14 +64,13 @@ class Table extends BaseTable
         switch (true) {
             case $this->isExternal():
                 return self::WRITE_EXTERNAL;
-
-            case $this->getConfig()->get(Formatter::CFG_SKIP_M2M_TABLES) && $this->isManyToMany():
+            case $this->getConfig(M2MSkipConfiguration::class)->getValue() && $this->isManyToMany():
                 return self::WRITE_M2M;
-
             default:
                 $writer->open($this->getTableFileName());
                 $this->writeBody($writer);
                 $writer->close();
+
                 return self::WRITE_OK;
         }
     }
@@ -84,7 +85,7 @@ class Table extends BaseTable
     {
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
-                if ($_this->getConfig()->get(Formatter::CFG_ADD_COMMENT)) {
+                if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
                     $writer
                         ->write($_this->getFormatter()->getComment(Comment::FORMAT_JS))
                         ->write('')
@@ -93,7 +94,7 @@ class Table extends BaseTable
             })
             ->write("module.exports = function(sequelize, DataTypes) {")
             ->indent()
-                ->write("return sequelize.define('%s', %s, %s);", $this->getModelName(), $this->asModel(), $this->asOptions())
+            ->write("return sequelize.define('%s', %s, %s);", $this->getModelName(), $this->asModel(), $this->asOptions())
             ->outdent()
             ->write("}")
         ;
@@ -128,8 +129,7 @@ class Table extends BaseTable
     protected function getFields()
     {
         $result = [];
-        foreach ($this->getColumns() as $column)
-        {
+        foreach ($this->getColumns() as $column) {
             $type = $this->getFormatter()->getDatatypeConverter()->getType($column);
             if (DatatypeConverterInterface::DATATYPE_DECIMAL == $column->getColumnType()) {
                 $type .= sprintf('(%s, %s)', $column->getParameters()->get('precision'), $column->getParameters()->get('scale'));

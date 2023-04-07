@@ -3,10 +3,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
- * Copyright (c) 2013 WitteStier <development@wittestier.nl>
- * Copyright (c) 2021 Marc-Olivier Laux <marco@matlaux.net>
+ * Copyright (c) 2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,27 +24,24 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Model;
+namespace MwbExporter\Formatter\Node\Sequelize6\Configuration;
 
-use MwbExporter\Model\Column as BaseColumn;
+use MwbExporter\Configuration\Configuration;
 
-class Column extends BaseColumn
+/**
+ * Allow table attributes and options to be extended in a such ways to provide
+ * extra definitions without modifying generated model files (and thus, being able
+ * to regenerate models).
+ *
+ * @author Toha <tohenk@yahoo.com>
+ * @config extendableModelDefinition|injectExtendFunction
+ * @label Enable extendable features in model definition
+ */
+class Extendable extends Configuration
 {
-    /**
-     * return true if the column is a primary key
-     *
-     * @return boolean
-     */
-    public function isUnique()
+    protected function initialize()
     {
-        if ($this->isUnique) {
-            foreach ($this->getTable()->getIndices() as $index) {
-                if ($index->isUnique() && count($index->getColumns()) === 1 && $index->getColumns()[0] === $this) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        $this->category = 'sequelize6Configuration';
+        $this->defaultValue = true;
     }
 }

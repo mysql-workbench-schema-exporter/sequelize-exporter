@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2020 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  * Copyright (c) 2021 Marc-Olivier Laux <marco@matlaux.net>
  *
@@ -29,14 +29,20 @@
 
 namespace MwbExporter\Formatter\Node\Sequelize6\Model;
 
-use MwbExporter\Model\Table as BaseTable;
-use MwbExporter\Formatter\Node\Sequelize6\Formatter;
-use MwbExporter\Writer\WriterInterface;
-use MwbExporter\Object\JS;
-use MwbExporter\Helper\Comment;
+use MwbExporter\Configuration\Comment as CommentConfiguration;
+use MwbExporter\Configuration\Indentation as IndentationConfiguration;
+use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
+use MwbExporter\Configuration\NamingStrategy as NamingStrategyConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\Extendable as ExtendableConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\ForeignKey as ForeignKeyConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Configuration\SemiColon as SemiColonConfiguration;
+use MwbExporter\Helper\Comment;
 use MwbExporter\Model\ForeignKey;
-use MwbExporter\Formatter\FormatterInterface;
+use MwbExporter\Model\Table as BaseTable;
+use MwbExporter\Object\JS;
+use MwbExporter\Writer\WriterInterface;
 
 class Table extends BaseTable
 {
@@ -50,13 +56,13 @@ class Table extends BaseTable
      */
     public function getJSObject($content, $multiline = true, $raw = false)
     {
-        $indentation = $this->getConfig()->get(Formatter::CFG_USE_TABS) ? "\t" : ' ';
-        $indentation = str_repeat($indentation, $this->getConfig()->get(Formatter::CFG_INDENTATION));
+        /** @var \MwbExporter\Configuration\Indentation $indentation */
+        $indentation = $this->getConfig(IndentationConfiguration::class);
 
         return new JS($content, [
+            'indentation' => $indentation->getIndentation(1),
             'multiline' => $multiline,
             'raw' => $raw,
-            'indentation' => $indentation,
         ]);
     }
 
@@ -65,14 +71,13 @@ class Table extends BaseTable
         switch (true) {
             case $this->isExternal():
                 return self::WRITE_EXTERNAL;
-
-            case $this->getConfig()->get(Formatter::CFG_SKIP_M2M_TABLES) && $this->isManyToMany():
+            case $this->getConfig(M2MSkipConfiguration::class)->getValue() && $this->isManyToMany():
                 return self::WRITE_M2M;
-
             default:
                 $writer->open($this->getTableFileName());
                 $this->writeBody($writer);
                 $writer->close();
+
                 return self::WRITE_OK;
         }
     }
@@ -85,12 +90,12 @@ class Table extends BaseTable
      */
     protected function writeBody(WriterInterface $writer)
     {
-        $semicolon = $this->getConfig()->get(Formatter::CFG_USE_SEMICOLON) ? ';' : '';
-        $extendable = $this->getConfig()->get(Formatter::CFG_INJECT_EXTEND_FUNCTION);
+        $semicolon = $this->getConfig(SemiColonConfiguration::class)->getValue() ? ';' : '';
+        $extendable = $this->getConfig(ExtendableConfiguration::class)->getValue();
 
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
-                if ($_this->getConfig()->get(Formatter::CFG_ADD_COMMENT)) {
+                if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
                     $writer
                         ->write($_this->getFormatter()->getComment(Comment::FORMAT_JS))
                         ->write('')
@@ -101,35 +106,35 @@ class Table extends BaseTable
             ->write("")
             ->write("module.exports = %s => {", $extendable ? "(sequelize, attrCallback, optCallback)" : "sequelize")
             ->indent()
-                ->write("let attributes = %s", $this->asModel())
-                ->write("let options = %s", $this->asOptions())
-                ->writeIf($extendable, "if (typeof attrCallback === 'function') {")
-                ->indent()
-                    ->writeIf($extendable, "attributes = attrCallback(attributes)$semicolon")
-                ->outdent()
-                ->writeIf($extendable, "}")
-                ->writeIf($extendable, "if (typeof optCallback === 'function') {")
-                ->indent()
-                    ->writeIf($extendable, "options = optCallback(options)$semicolon")
-                ->outdent()
-                ->writeIf($extendable, "}")
-                ->write("const Model = sequelize.define('%s', attributes, options)$semicolon", $this->getModelName())
-                ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($semicolon) {
-                    if ($_this->getConfig()->get(Formatter::CFG_GENERATE_ASSOCIATION_METHOD)) {
-                        $writer
-                            ->write("")
-                            ->write("Model.associate = () => {", $this->getModelName())
-                            ->indent()
-                                ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
-                                    $_this->writeASsociations($writer);
-                                })
-                            ->outdent()
-                            ->write("}$semicolon")
-                            ->write("")
-                        ;
-                    }
-                })
-                ->write("return Model$semicolon")
+            ->write("let attributes = %s", $this->asModel())
+            ->write("let options = %s", $this->asOptions())
+            ->writeIf($extendable, "if (typeof attrCallback === 'function') {")
+            ->indent()
+            ->writeIf($extendable, "attributes = attrCallback(attributes)$semicolon")
+            ->outdent()
+            ->writeIf($extendable, "}")
+            ->writeIf($extendable, "if (typeof optCallback === 'function') {")
+            ->indent()
+            ->writeIf($extendable, "options = optCallback(options)$semicolon")
+            ->outdent()
+            ->writeIf($extendable, "}")
+            ->write("const Model = sequelize.define('%s', attributes, options)$semicolon", $this->getModelName())
+            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($semicolon) {
+                if ($_this->getConfig(AssociationConfiguration::class)->getValue()) {
+                    $writer
+                        ->write("")
+                        ->write("Model.associate = () => {", $this->getModelName())
+                        ->indent()
+                        ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
+                            $_this->writeASsociations($writer);
+                        })
+                        ->outdent()
+                        ->write("}$semicolon")
+                        ->write("")
+                    ;
+                }
+            })
+            ->write("return Model$semicolon")
             ->outdent()
             ->write("}")
             ->write("")
@@ -143,10 +148,10 @@ class Table extends BaseTable
         /** @var \MwbExporter\Formatter\Node\Formatter */
         $formatter = $this->getFormatter();
         $result = array_merge([
-            'sequelize'         => $this->getJSObject('sequelize', false, true),
-            'modelName'         => $this->getModelName(),
-            'tableName'         => $this->getRawTableName(),
-            'indexes'           => count($indexes = $this->getIndexes()) ? $indexes : null,
+            'sequelize' => $this->getJSObject('sequelize', false, true),
+            'modelName' => $this->getModelName(),
+            'tableName' => $this->getRawTableName(),
+            'indexes' => count($indexes = $this->getIndexes()) ? $indexes : null,
         ], $formatter->getTableProp());
 
         return $this->getJSObject($result);
@@ -169,7 +174,7 @@ class Table extends BaseTable
         $result = [];
         /** @var \MwbExporter\Formatter\Node\Sequelize6\Model\Column $column */
         foreach ($this->getColumns() as $column) {
-            if (!$this->getConfig()->get(Formatter::CFG_GENERATE_FOREIGN_KEYS_FIELDS) && count($column->getForeignKeys())) {
+            if (!$this->getConfig(ForeignKeyConfiguration::class)->getValue() && count($column->getForeignKeys())) {
                 continue;
             }
 
@@ -186,7 +191,7 @@ class Table extends BaseTable
             }
             $c = [];
             $c['type'] = $this->getJSObject(sprintf('DataTypes.%s', $type ? $type : 'STRING.BINARY'), true, true);
-            
+
             $c['field'] = $column->getColumnName();
             if ($column->isPrimary()) {
                 $c['primaryKey'] = true;
@@ -204,7 +209,7 @@ class Table extends BaseTable
                     $c['defaultValue'] = substr($column->getDefaultValue(), -1) === ')'
                         ? $this->getJSObject(sprintf("sequelize.fn('%s')", substr($column->getDefaultValue(), 0, -2)), false, true)
                         : $this->getJSObject(sprintf("sequelize.literal('%s')", $column->getDefaultValue()), false, true);
-                } else if ($type === 'BOOLEAN') {
+                } elseif ($type === 'BOOLEAN') {
                     $c['defaultValue'] = (bool) $this->getJSObject($column->getDefaultValue(), false, true)->__toString();
                 } else {
                     $c['defaultValue'] = $this->getJSObject($column->getDefaultValue(), true, true);
@@ -217,12 +222,10 @@ class Table extends BaseTable
                 foreach ($column->getForeignKeys() as $foreignKey) {
                     $c['references']['model'] = $foreignKey->getReferencedTable()->getRawTableName();
                     $c['references']['key'] = $this->getNaming($foreignKey->getForeign()->getColumnName());
-                    if ($onUpdate = $foreignKey->getParameter('updateRule'))
-                    {
+                    if ($onUpdate = $foreignKey->getParameter('updateRule')) {
                         $c['onUpdate'] = strtoupper($onUpdate);
                     }
-                    if ($onDelete = $foreignKey->getParameter('deleteRule'))
-                    {
+                    if ($onDelete = $foreignKey->getParameter('deleteRule')) {
                         $c['onDelete'] = strtoupper($onDelete);
                     }
                 }
@@ -237,13 +240,13 @@ class Table extends BaseTable
     {
         $result = [];
         foreach ($this->getIndices() as $index) {
-            $isForeignIndex = array_reduce($index->getColumns(), function ($isForeignIndex, $column) {
+            $isForeignIndex = array_reduce($index->getColumns(), function($isForeignIndex, $column) {
                 return $isForeignIndex || count($column->getForeignKeys()) > 0;
             }, false);
 
             // Create foreign index if its essociated field or association is generated
-            if ($this->getConfig()->get(Formatter::CFG_GENERATE_FOREIGN_KEYS_FIELDS) ||
-                $this->getConfig()->get(Formatter::CFG_GENERATE_ASSOCIATION_METHOD) ||
+            if ($this->getConfig(ForeignKeyConfiguration::class)->getValue() ||
+                $this->getConfig(AssociationConfiguration::class)->getValue() ||
                 !$isForeignIndex) {
                 if ($index->isIndex() || $index->isUnique()) {
                     $result[] = [
@@ -258,7 +261,8 @@ class Table extends BaseTable
         return $result;
     }
 
-    protected function getConstraints() {
+    protected function getConstraints()
+    {
         $constraints = [];
         foreach ($this->getAllLocalForeignKeys() as $k => $local) {
             if (!$this->isLocalForeignKeyIgnored($local)) {
@@ -280,12 +284,14 @@ class Table extends BaseTable
                 }
             }
         }
-        return array_map(function ($count) {
+
+        return array_map(function($count) {
             return $count > 1 ? false : true;
         }, $constraints);
     }
 
-    public function extractForeignAlias($foreignColumnName, $targetTableName, $targetColumnName) {
+    public function extractForeignAlias($foreignColumnName, $targetTableName, $targetColumnName)
+    {
         // remove standard name
         $relatedAlias = preg_replace(
             "/(${targetTableName}_)?${targetColumnName}/",
@@ -305,7 +311,7 @@ class Table extends BaseTable
 
     protected function writeAssociations(WriterInterface $writer)
     {
-        $semicolon = $this->getConfig()->get(Formatter::CFG_USE_SEMICOLON) ? ';' : '';
+        $semicolon = $this->getConfig(SemiColonConfiguration::class)->getValue() ? ';' : '';
         $constraints = $this->getConstraints();
 
         // 1 <=> N references
@@ -324,15 +330,17 @@ class Table extends BaseTable
             $as = '';
 
             if ($relatedColumnName) {
-                // assumes multiple foreign keys to same model is formatted as "%alias%_(%foreign_table%_)?%foreign_col%" 
+                // assumes multiple foreign keys to same model is formatted as "%alias%_(%foreign_table%_)?%foreign_col%"
                 // or "(%foreign_table%_)?%foreign_col%_%alias%"
                 $relatedAlias = $this->extractForeignAlias($relatedColumnName, $referencedTableName, $foreignColumnName);
 
                 if ($relatedAlias) {
-                    $as = $this->pluralize($this->getNaming(sprintf('%s_%s_%s',
+                    $as = $this->pluralize($this->getNaming(sprintf(
+                        '%s_%s_%s',
                         $relatedAlias,
                         $mappedBy,
-                        $local->getOwningTable()->getModelName()), null, true));
+                        $local->getOwningTable()->getModelName()
+                    ), null, true));
                 } else {
                     $as = $this->pluralize($this->getNaming($local->getOwningTable()->getModelName(), null, true));
                 }
@@ -345,19 +353,19 @@ class Table extends BaseTable
             }
 
             $options = [
-                'foreignKey'    => [
-                    'name'          => $this->getNaming($local->getLocal()->getColumnName()),
-                    'field'         => $local->getLocal()->getColumnName(),
-                    'allowNull'     => !$local->getLocal()->isNotNull(),
+                'foreignKey' => [
+                    'name' => $this->getNaming($local->getLocal()->getColumnName()),
+                    'field' => $local->getLocal()->getColumnName(),
+                    'allowNull' => !$local->getLocal()->isNotNull(),
                 ],
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
-                'onUpdate'      => $constraints[$local->getOwningTable()->getModelName()] === false ?null : $local->getParameter('updateRule'),
+                'onUpdate' => $constraints[$local->getOwningTable()->getModelName()] === false ? null : $local->getParameter('updateRule'),
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
-                'onDelete'      => $constraints[$local->getOwningTable()->getModelName()] === false ?null : $local->getParameter('deleteRule'),
-                'targetKey'     => $this->getNaming($local->getForeign()->getColumnName()),
-                'as'            => $as,
+                'onDelete' => $constraints[$local->getOwningTable()->getModelName()] === false ? null : $local->getParameter('deleteRule'),
+                'targetKey' => $this->getNaming($local->getForeign()->getColumnName()),
+                'as' => $as,
                 // @see https://sequelize.org/master/manual/constraints-and-circularities.html
-                'constraints'   => $constraints[$local->getOwningTable()->getModelName()] === false ? false : null
+                'constraints' => $constraints[$local->getOwningTable()->getModelName()] === false ? false : null
             ];
 
             $associationMethod = null;
@@ -377,11 +385,13 @@ class Table extends BaseTable
             $writer
                 ->writeIf(!$firstAssociation, '')
                 ->write($comment)
-                ->write("%s.%s(sequelize.models.%s, %s)$semicolon", 
+                ->write(
+                    "%s.%s(sequelize.models.%s, %s)$semicolon",
                     "Model",
                     $associationMethod,
                     $local->getOwningTable()->getModelName(),
-                    $this->getJSObject($options));
+                    $this->getJSObject($options)
+                );
 
             $firstAssociation = false;
         }
@@ -402,16 +412,18 @@ class Table extends BaseTable
             $foreignColumnName = $foreign->getForeign()->getColumnName();
 
             if ($relatedColumnName) {
-                // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%" 
+                // assumes multiple foreign keys to same model is formatted as "%alias%_%foreign_col%"
                 // or "%foreign_col%_%alias%"
                 $relatedAlias = $this->extractForeignAlias($relatedColumnName, $referencedTableName, $foreignColumnName);
 
                 if (!$relatedAlias) {
                     $relatedAlias = $foreign->getReferencedTable()->getModelName();
                 } else {
-                    $relatedAlias = sprintf("%s_%s",
+                    $relatedAlias = sprintf(
+                        "%s_%s",
                         $relatedAlias,
-                        $foreign->getReferencedTable()->getModelName());
+                        $foreign->getReferencedTable()->getModelName()
+                    );
                 }
 
                 $as = $this->getNaming($relatedAlias, null, true);
@@ -423,24 +435,24 @@ class Table extends BaseTable
             }
 
             $options = [
-                'foreignKey'    => [
-                    'name'          => $this->getNaming($foreign->getLocal()->getColumnName()),
-                    'field'         => $foreign->getLocal()->getColumnName(),
-                    'allowNull'     => !$foreign->getLocal()->isNotNull(),
+                'foreignKey' => [
+                    'name' => $this->getNaming($foreign->getLocal()->getColumnName()),
+                    'field' => $foreign->getLocal()->getColumnName(),
+                    'allowNull' => !$foreign->getLocal()->isNotNull(),
                 ],
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
-                'onUpdate'      => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('updateRule'),
+                'onUpdate' => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('updateRule'),
                 // @see https://github.com/sequelize/sequelize/issues/5158#issuecomment-183051761
-                'onUpdate'      => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('deleteRule'),
-                'targetKey'     => $this->getNaming($foreign->getForeign()->getColumnName()),
-                'as'            => $as,
+                'onUpdate' => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? null : $foreign->getParameter('deleteRule'),
+                'targetKey' => $this->getNaming($foreign->getForeign()->getColumnName()),
+                'as' => $as,
                 // @see https://sequelize.org/master/manual/constraints-and-circularities.html
-                'constraints'   => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? false : null
+                'constraints' => $constraints[$foreign->getReferencedTable()->getModelName()] === false ? false : null
             ];
 
             $associationMethod = 'belongsTo';
             $this->getDocument()->addLog(sprintf('  Writing N <=> ? relation "%s"', $targetEntity));
-            
+
             if ($foreign->isManyToOne()) {
                 $this->getDocument()->addLog('  Relation considered as "N <=> 1"');
                 $comment = '// N <=> 1 association';
@@ -452,11 +464,13 @@ class Table extends BaseTable
             $writer
                 ->writeIf(!$firstAssociation, '')
                 ->write($comment)
-                ->write("%s.%s(sequelize.models.%s, %s)$semicolon", 
+                ->write(
+                    "%s.%s(sequelize.models.%s, %s)$semicolon",
                     "Model",
                     $associationMethod,
                     $foreign->getReferencedTable()->getModelName(),
-                    $this->getJSObject($options));
+                    $this->getJSObject($options)
+                );
 
             $firstAssociation = false;
         }
@@ -466,23 +480,25 @@ class Table extends BaseTable
             $this->getDocument()->addLog(sprintf('  Writing setter/getter for N <=> N "%s"', $relation['refTable']->getModelName()));
 
             $options = [
-                'through'       => $relation['reference']->getOwningTable()->getRawTableName(),
-                'foreignKey'    => [
-                    'name'          => $relation['reference']->getLocal()->getColumnName()
+                'through' => $relation['reference']->getOwningTable()->getRawTableName(),
+                'foreignKey' => [
+                    'name' => $relation['reference']->getLocal()->getColumnName()
                 ],
-                'onUpdate'      => $relation['reference']->getParameter('updateRule'),
-                'onDelete'      => $relation['reference']->getParameter('deleteRule'),
-                'targetKey'     => $this->getNaming($relation['target']->getForeign()->getColumnName()),
-                'as'            => $this->pluralize($this->getNaming($relation['refTable']->getModelName(), null, true))
+                'onUpdate' => $relation['reference']->getParameter('updateRule'),
+                'onDelete' => $relation['reference']->getParameter('deleteRule'),
+                'targetKey' => $this->getNaming($relation['target']->getForeign()->getColumnName()),
+                'as' => $this->pluralize($this->getNaming($relation['refTable']->getModelName(), null, true))
             ];
 
             $writer
                 ->writeIf(!$firstAssociation, '')
                 ->write('// N <=> M association')
-                ->write("%s.belongsToMany(sequelize.models.%s, %s)$semicolon",
-                    "Model", 
-                    $relation['refTable']->getModelName(), 
-                    $this->getJSObject($options));
+                ->write(
+                    "%s.belongsToMany(sequelize.models.%s, %s)$semicolon",
+                    "Model",
+                    $relation['refTable']->getModelName(),
+                    $this->getJSObject($options)
+                );
 
             $firstAssociation = false;
         }
@@ -501,8 +517,8 @@ class Table extends BaseTable
     {
         $fk1->getReferencedTable()->setManyToManyRelation([
             'reference' => $fk1,
-            'target'    => $fk2,
-            'refTable'  => $fk2->getReferencedTable(),
+            'target' => $fk2,
+            'refTable' => $fk2->getReferencedTable(),
         ]);
 
         return $this;
@@ -525,15 +541,14 @@ class Table extends BaseTable
      *
      * @param string $name
      * @param string $strategy
-     * @param bool $isModel 
+     * @param bool $isModel
      * @return string
      */
     public function getNaming($name, $strategy = null, $isModel = false)
     {
         if (!$strategy) {
-            $strategy = $this->getConfig()->get(FormatterInterface::CFG_NAMING_STRATEGY);
-            if ($strategy === FormatterInterface::NAMING_CAMEL_CASE && $isModel) {
-                $strategy = FormatterInterface::NAMING_PASCAL_CASE;
+            if ($strategy === NamingStrategyConfiguration::CAMEL_CASE && $isModel) {
+                $strategy = NamingStrategyConfiguration::PASCAL_CASE;
             }
         }
 
