@@ -33,6 +33,90 @@ use MwbExporter\Configuration\Configuration;
  * extra definitions without modifying generated model files (and thus, being able
  * to regenerate models).
  *
+ * Example scenario:
+ *
+ * _`User.js` (generated)_
+ *
+ * ```javascript
+ * const { DataTypes } = require('sequelize');
+ *
+ * module.exports = (sequelize, attrCallback, optCallback) => {
+ *     let attributes = {
+ *         lastName: {
+ *             type: DataTypes.STRING(200),
+ *             field: 'name',
+ *             allowNull: false,
+ *             defaultValue: ''
+ *         },
+ *         firstName: {
+ *             ...
+ *         },
+ *         ...
+ *     }
+ *     let options = {
+ *         ...
+ *     }
+ *     if (typeof attrCallback === 'function') {
+ *         attributes = attrCallback(attributes);
+ *     }
+ *     if (typeof optCallback === 'function') {
+ *         options = optCallback(options);
+ *     }
+ *     const Model = sequelize.define('User', attributes, options);
+ *
+ *     Model.associate = () => {
+ *         ...
+ *     }
+ *
+ *     return Model;
+ * }
+ * ```
+ *
+ * _`extensions/User.js` (manually created)_
+ *
+ * ```javascript
+ * const { DataTypes } = require('sequelize');
+ *
+ * module.exports = sequelize => attributes => {
+ *     return Object.assign(attributes, {
+ *         lastName: {
+ *             get() {
+ *                 const rawValue = this.getDataValue('lastName');
+ *                 return rawValue ? rawValue.toUpperCase() : null;
+ *             }
+ *         },
+ *         fullName: {
+ *             type: DataTypes.VIRTUAL,
+ *             get() {
+ *                 return `${this.firstName} ${this.lastName}`
+ *             },
+ *             set(value) {
+ *                 throw new Error('Do not try to set the `fullName` value!')
+ *             }
+ *         }
+ *     });
+ * } 
+ * ```
+ *
+ * Initialization can be achieved like this:
+ *
+ * ```javascript
+ * const Sequelize = require('sequelize');
+ *
+ * const sequelize = new Sequelize({...});
+ * const userExtension = require('./path/to/extensions/User')(sequelize);
+ * const User = require('./path/to/User')(sequelize, userExtension, options => {
+ *     return Object.assign(options, {
+ *         hooks: {
+ *             beforeCreate: (instance, options) => {
+ *                 ...
+ *             }
+ *         }
+ *     });
+ * });
+ * ...
+ * ```
+ *
  * @author Toha <tohenk@yahoo.com>
  * @config extendableModelDefinition|injectExtendFunction
  * @label Enable extendable features in model definition

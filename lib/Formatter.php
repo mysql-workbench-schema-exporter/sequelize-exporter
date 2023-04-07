@@ -42,7 +42,7 @@ abstract class Formatter extends BaseFormatter
         parent::init();
         $this->getConfigurations()
             ->add(new TablePropConfiguration())
-            ->merge([IndentationConfiguration::class => 4])
+            ->merge([IndentationConfiguration::class => 4], true)
         ;
     }
 
@@ -84,5 +84,20 @@ abstract class Formatter extends BaseFormatter
         }
 
         return $prop;
+    }
+
+    public static function getDocDir()
+    {
+        return __DIR__.'/../docs';
+    }
+
+    /**
+     * Get configuration scope.
+     *
+     * @return string
+     */
+    public static function getScope()
+    {
+        return 'Sequelize Global';
     }
 }

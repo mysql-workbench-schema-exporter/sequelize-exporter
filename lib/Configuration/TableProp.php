@@ -31,12 +31,7 @@ use MwbExporter\Configuration\Configuration;
 /**
  * Provides a JSON file used as table options override.
  *
- * Default table options defined as follows:
- * {
- *     timestamps: false,
- *     underscored: false,
- *     syncOnAssociation: false
- * }
+ * Default table options defined as follows `{timestamps: false, underscored: false, syncOnAssociation: false}`
  *
  * @author Toha <tohenk@yahoo.com>
  * @config commonTableProp

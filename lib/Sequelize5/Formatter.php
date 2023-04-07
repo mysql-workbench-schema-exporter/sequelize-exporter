@@ -59,4 +59,14 @@ class Formatter extends BaseFormatter
     {
         return 'Node Sequelize Model (v5)';
     }
+
+    /**
+     * Get configuration scope.
+     *
+     * @return string
+     */
+    public static function getScope()
+    {
+        return 'Sequelize 5';
+    }
 }
