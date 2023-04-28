@@ -1,0 +1,30 @@
+{
+    "export": "node-sequelize7",
+    "zip": false,
+    "dir": "build",
+    "params": {
+        "language": "english",
+        "useTab": false,
+        "indentation": 4,
+        "eolDelimiter": "win",
+        "filename": "%entity%.%extension%",
+        "backupExistingFile": true,
+        "addGeneratorInfoAsComment": true,
+        "namingStrategy": "as-is",
+        "identifierStrategy": "none",
+        "cleanUserDatatypePrefix": "",
+        "enhanceManyToManyDetection": true,
+        "sortTableAndView": true,
+        "skipManyToManyTables": true,
+        "skipPluralNameChecking": false,
+        "exportOnlyInCategory": "",
+        "logToConsole": false,
+        "logFile": "",
+        "useLoggedStorage": false,
+        "commonTableProp": "prop.json",
+        "useSemicolon": true,
+        "generateForeignKeysField": true,
+        "generateAssociationMethod": true,
+        "extendableModelDefinition": true
+    }
+}

@@ -50,3 +50,4 @@ jobs:
       run: |
         vendor/bin/mysql-workbench-schema-export --config=export1.json vendor/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter/example/data/sakila.mwb
         vendor/bin/mysql-workbench-schema-export --config=export2.json vendor/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter/example/data/sakila.mwb
+        vendor/bin/mysql-workbench-schema-export --config=export3.json vendor/mysql-workbench-schema-exporter/mysql-workbench-schema-exporter/example/data/sakila.mwb

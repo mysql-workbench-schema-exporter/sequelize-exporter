@@ -35,6 +35,7 @@ use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Configuration\NamingStrategy as NamingStrategyConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
+use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
 use MwbExporter\Formatter\Node\Sequelize6\Configuration\Association as AssociationConfiguration;
 use MwbExporter\Formatter\Node\Sequelize6\Configuration\Extendable as ExtendableConfiguration;
 use MwbExporter\Formatter\Node\Sequelize6\Configuration\ForeignKey as ForeignKeyConfiguration;
@@ -93,6 +94,7 @@ class Table extends BaseTable
     {
         $semicolon = $this->getConfig(SemiColonConfiguration::class)->getValue() ? ';' : '';
         $extendable = $this->getConfig(ExtendableConfiguration::class)->getValue();
+        $packageName = $this->getConfig(PackageNameConfiguration::class)->getValue();
 
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
@@ -111,7 +113,7 @@ class Table extends BaseTable
                     ;
                 }
             })
-            ->write("const { DataTypes } = require('sequelize')$semicolon")
+            ->write("const { DataTypes } = require('$packageName')$semicolon")
             ->write("")
             ->write("module.exports = %s => {", $extendable ? "(sequelize, attrCallback, optCallback)" : "sequelize")
             ->indent()

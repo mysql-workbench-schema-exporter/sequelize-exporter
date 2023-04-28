@@ -3,7 +3,6 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
  * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,14 +24,12 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node;
+namespace MwbExporter\Formatter\Node\Sequelize7;
 
-use MwbExporter\Configuration\Indentation as IndentationConfiguration;
-use MwbExporter\Formatter\Formatter as BaseFormatter;
 use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
-use MwbExporter\Formatter\Node\Configuration\TableProp as TablePropConfiguration;
+use MwbExporter\Formatter\Node\Sequelize6\Formatter as BaseFormatter;
 
-abstract class Formatter extends BaseFormatter
+class Formatter extends BaseFormatter
 {
     /**
      * (non-PHPdoc)
@@ -42,55 +39,17 @@ abstract class Formatter extends BaseFormatter
     {
         parent::init();
         $this->getConfigurations()
-            ->add(new PackageNameConfiguration())
-            ->add(new TablePropConfiguration())
-            ->merge([IndentationConfiguration::class => 4], true)
+            ->merge([PackageNameConfiguration::class => '@sequelize/core'], true)
         ;
-    }
-
-    public function getVersion()
-    {
-        return 'dev';
     }
 
     /**
      * (non-PHPdoc)
-     * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
+     * @see \MwbExporter\Formatter\Formatter::getTitle()
      */
-    protected function createDatatypeConverter()
+    public function getTitle()
     {
-        return new DatatypeConverter();
-    }
-
-    public function getFileExtension()
-    {
-        return 'js';
-    }
-
-    /**
-     * Get common table property.
-     *
-     * @return array
-     */
-    public function getTableProp()
-    {
-        $prop = [
-            'timestamps' => false,
-            'underscored' => false,
-            'syncOnAssociation' => false
-        ];
-        if (is_readable($filename = $this->getConfig(TablePropConfiguration::class)->getValue())) {
-            if ($commonProp = json_decode(file_get_contents($filename), true)) {
-                $prop = array_merge($prop, $commonProp);
-            }
-        }
-
-        return $prop;
-    }
-
-    public static function getDocDir()
-    {
-        return __DIR__.'/../docs';
+        return 'Node Sequelize Model (v7)';
     }
 
     /**
@@ -100,6 +59,6 @@ abstract class Formatter extends BaseFormatter
      */
     public static function getScope()
     {
-        return 'Sequelize Global';
+        return 'Sequelize 7';
     }
 }
