@@ -28,10 +28,7 @@
 
 namespace MwbExporter\Formatter\Node\Sequelize6;
 
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\Association as AssociationConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\Extendable as ExtendableConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\ForeignKey as ForeignKeyConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\SemiColon as SemiColonConfiguration;
+use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
 use MwbExporter\Formatter\Node\Formatter as BaseFormatter;
 use MwbExporter\Model\Base;
 
@@ -45,10 +42,7 @@ class Formatter extends BaseFormatter
     {
         parent::init();
         $this->getConfigurations()
-            ->add(new SemiColonConfiguration())
-            ->add(new ForeignKeyConfiguration())
-            ->add(new AssociationConfiguration())
-            ->add(new ExtendableConfiguration())
+            ->merge([PackageNameConfiguration::class => 'sequelize'], true)
         ;
     }
 

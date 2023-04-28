@@ -24,39 +24,27 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Configuration;
+namespace MwbExporter\Formatter\Node\Configuration;
 
 use MwbExporter\Configuration\Configuration;
 
 /**
- * Generate association method to define associations between models.
- * Each model then has a `associate()` method which can be called
- * to associate the models.
- *
- * To use the association is described as follows:
- *
- * ```javascript
- * const { Sequelize } = require('sequelize');
- *
- * const sequelize = new Sequelize({...});
- * const MyModel1 = sequelize.import('./path/to/MyModel');
- * const MyModel2 = sequelize.import('./path/to/MyMode2');
- * ...
- *
- * MyModel1.associate();
- * MyModel2.associate();
- * ...
- * ```
+ * Whether or not to add semicolon to line ending (standard Eslint compliant).
  *
  * @author Toha <tohenk@yahoo.com>
- * @config generateAssociationMethod
- * @label Generate association method
+ * @config useSemicolon
+ * @label Use semicolon as line ending
  */
-class Association extends Configuration
+class SemiColon extends Configuration
 {
     protected function initialize()
     {
         $this->category = 'sequelizeConfiguration';
-        $this->defaultValue = false;
+        $this->defaultValue = true;
+    }
+
+    public function getSemiColon()
+    {
+        return $this->getValue() ? ';' : '';
     }
 }

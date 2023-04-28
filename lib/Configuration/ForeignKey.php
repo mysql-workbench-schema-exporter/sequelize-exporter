@@ -24,18 +24,18 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Configuration;
+namespace MwbExporter\Formatter\Node\Configuration;
 
 use MwbExporter\Configuration\Configuration;
 
 /**
- * Whether or not to add semicolon to line ending (standard Eslint compliant).
+ * Whether or not to generate foreign keys fields `Sequelize 6+`.
  *
  * @author Toha <tohenk@yahoo.com>
- * @config useSemicolon
- * @label Use semicolon as line ending
+ * @config generateForeignKeysField|generateForeignKeysFields
+ * @label Generate foreign key field
  */
-class SemiColon extends Configuration
+class ForeignKey extends Configuration
 {
     protected function initialize()
     {

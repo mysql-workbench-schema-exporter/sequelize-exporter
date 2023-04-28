@@ -29,7 +29,11 @@ namespace MwbExporter\Formatter\Node;
 
 use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Formatter\Formatter as BaseFormatter;
+use MwbExporter\Formatter\Node\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Node\Configuration\Extendable as ExtendableConfiguration;
+use MwbExporter\Formatter\Node\Configuration\ForeignKey as ForeignKeyConfiguration;
 use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
+use MwbExporter\Formatter\Node\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Formatter\Node\Configuration\TableProp as TablePropConfiguration;
 
 abstract class Formatter extends BaseFormatter
@@ -44,6 +48,10 @@ abstract class Formatter extends BaseFormatter
         $this->getConfigurations()
             ->add(new PackageNameConfiguration())
             ->add(new TablePropConfiguration())
+            ->add(new SemiColonConfiguration())
+            ->add(new ForeignKeyConfiguration())
+            ->add(new AssociationConfiguration())
+            ->add(new ExtendableConfiguration())
             ->merge([IndentationConfiguration::class => 4], true)
         ;
     }

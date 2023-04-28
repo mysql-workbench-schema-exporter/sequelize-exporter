@@ -35,11 +35,11 @@ use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Configuration\NamingStrategy as NamingStrategyConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
+use MwbExporter\Formatter\Node\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Node\Configuration\Extendable as ExtendableConfiguration;
+use MwbExporter\Formatter\Node\Configuration\ForeignKey as ForeignKeyConfiguration;
 use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\Association as AssociationConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\Extendable as ExtendableConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\ForeignKey as ForeignKeyConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Configuration\SemiColon as SemiColonConfiguration;
+use MwbExporter\Formatter\Node\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Helper\Comment;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Model\Table as BaseTable;
@@ -92,9 +92,11 @@ class Table extends BaseTable
      */
     protected function writeBody(WriterInterface $writer)
     {
-        $semicolon = $this->getConfig(SemiColonConfiguration::class)->getValue() ? ';' : '';
         $extendable = $this->getConfig(ExtendableConfiguration::class)->getValue();
         $packageName = $this->getConfig(PackageNameConfiguration::class)->getValue();
+        /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
+        $semicolon = $this->getConfig(SemiColonConfiguration::class);
+        $semicolon = $semicolon->getSemiColon();
 
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
@@ -305,7 +307,7 @@ class Table extends BaseTable
     {
         // remove standard name
         $relatedAlias = preg_replace(
-            "/(${targetTableName}_)?${targetColumnName}/",
+            "/({$targetTableName}_)?$targetColumnName/",
             '',
             $foreignColumnName
         );
@@ -322,7 +324,9 @@ class Table extends BaseTable
 
     protected function writeAssociations(WriterInterface $writer)
     {
-        $semicolon = $this->getConfig(SemiColonConfiguration::class)->getValue() ? ';' : '';
+        /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
+        $semicolon = $this->getConfig(SemiColonConfiguration::class);
+        $semicolon = $semicolon->getSemiColon();
         $constraints = $this->getConstraints();
 
         // 1 <=> N references

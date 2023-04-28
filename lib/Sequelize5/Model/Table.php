@@ -33,6 +33,7 @@ use MwbExporter\Configuration\Header as HeaderConfiguration;
 use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
+use MwbExporter\Formatter\Node\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Helper\Comment;
 use MwbExporter\Model\Table as BaseTable;
 use MwbExporter\Object\JS;
@@ -84,6 +85,10 @@ class Table extends BaseTable
      */
     protected function writeBody(WriterInterface $writer)
     {
+        /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
+        $semicolon = $this->getConfig(SemiColonConfiguration::class);
+        $semicolon = $semicolon->getSemiColon();
+
         $writer
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
                 /** @var \MwbExporter\Configuration\Header $header */
@@ -103,7 +108,7 @@ class Table extends BaseTable
             })
             ->write("module.exports = function(sequelize, DataTypes) {")
             ->indent()
-            ->write("return sequelize.define('%s', %s, %s);", $this->getModelName(), $this->asModel(), $this->asOptions())
+            ->write("return sequelize.define('%s', %s, %s)$semicolon", $this->getModelName(), $this->asModel(), $this->asOptions())
             ->outdent()
             ->write("}")
         ;

@@ -1,6 +1,6 @@
 # Node Sequelize Model (v7) Configuration
 
-Auto generated at 2023-04-28T09:14:39+0700.
+Auto generated at 2023-04-28T09:57:08+0700.
 
 ## Global Configuration
 
@@ -155,8 +155,6 @@ Auto generated at 2023-04-28T09:14:39+0700.
 
     Default value: `blank`
 
-## Sequelize 6 Configuration
-
   * `useSemicolon`
 
     Whether or not to add semicolon to line ending (standard Eslint compliant).
@@ -165,7 +163,7 @@ Auto generated at 2023-04-28T09:14:39+0700.
 
   * `generateForeignKeysField` (alias: `generateForeignKeysFields`)
 
-    Whether or not to generate foreign keys fields.
+    Whether or not to generate foreign keys fields `Sequelize 6+`.
 
     Default value: `true`
 
@@ -173,7 +171,7 @@ Auto generated at 2023-04-28T09:14:39+0700.
 
     Generate association method to define associations between models.
     Each model then has a `associate()` method which can be called
-    to associate the models.
+    to associate the models `Sequelize 6+`.
 
     To use the association is described as follows:
 
@@ -196,7 +194,7 @@ Auto generated at 2023-04-28T09:14:39+0700.
 
     Allow table attributes and options to be extended in a such ways to provide
     extra definitions without modifying generated model files (and thus, being able
-    to regenerate models).
+    to regenerate models) `Sequelize 6+`.
 
     Example scenario:
 
@@ -283,6 +281,11 @@ Auto generated at 2023-04-28T09:14:39+0700.
     ```
 
     Default value: `true`
+
+## Sequelize 6 Configuration
+
+  * No configuration available
+
 
 ## Sequelize 7 Configuration
 

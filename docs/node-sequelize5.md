@@ -1,6 +1,6 @@
 # Node Sequelize Model (v5) Configuration
 
-Auto generated at 2023-04-28T09:14:39+0700.
+Auto generated at 2023-04-28T09:57:08+0700.
 
 ## Global Configuration
 
@@ -154,6 +154,133 @@ Auto generated at 2023-04-28T09:14:39+0700.
     syncOnAssociation: false}`
 
     Default value: `blank`
+
+  * `useSemicolon`
+
+    Whether or not to add semicolon to line ending (standard Eslint compliant).
+
+    Default value: `true`
+
+  * `generateForeignKeysField` (alias: `generateForeignKeysFields`)
+
+    Whether or not to generate foreign keys fields `Sequelize 6+`.
+
+    Default value: `true`
+
+  * `generateAssociationMethod`
+
+    Generate association method to define associations between models.
+    Each model then has a `associate()` method which can be called
+    to associate the models `Sequelize 6+`.
+
+    To use the association is described as follows:
+
+    ```javascript
+    const { Sequelize } = require('sequelize');
+
+    const sequelize = new Sequelize({...});
+    const MyModel1 = sequelize.import('./path/to/MyModel');
+    const MyModel2 = sequelize.import('./path/to/MyMode2');
+    ...
+
+    MyModel1.associate();
+    MyModel2.associate();
+    ...
+    ```
+
+    Default value: `false`
+
+  * `extendableModelDefinition` (alias: `injectExtendFunction`)
+
+    Allow table attributes and options to be extended in a such ways to provide
+    extra definitions without modifying generated model files (and thus, being able
+    to regenerate models) `Sequelize 6+`.
+
+    Example scenario:
+
+    _`User.js` (generated)_
+
+    ```javascript
+    const { DataTypes } = require('sequelize');
+
+    module.exports = (sequelize, attrCallback, optCallback) => {
+        let attributes = {
+            lastName: {
+                type: DataTypes.STRING(200),
+                field: 'name',
+                allowNull: false,
+                defaultValue: ''
+            },
+            firstName: {
+                ...
+            },
+            ...
+        }
+        let options = {
+            ...
+        }
+        if (typeof attrCallback === 'function') {
+            attributes = attrCallback(attributes);
+        }
+        if (typeof optCallback === 'function') {
+            options = optCallback(options);
+        }
+        const Model = sequelize.define('User', attributes, options);
+
+        Model.associate = () => {
+            ...
+        }
+
+        return Model;
+    }
+    ```
+
+    _`extensions/User.js` (manually created)_
+
+    ```javascript
+    const { DataTypes } = require('sequelize');
+
+    module.exports = sequelize => attributes => {
+        return Object.assign(attributes, {
+            lastName: {
+                get() {
+                    const rawValue = this.getDataValue('lastName');
+                    return rawValue ? rawValue.toUpperCase() : null;
+                }
+            },
+            fullName: {
+                type: DataTypes.VIRTUAL,
+                get() {
+                    return `${this.firstName} ${this.lastName}`
+                },
+                set(value) {
+                    throw new Error('Do not try to set the `fullName` value!')
+                }
+            }
+        });
+    }
+    ```
+
+    Initialization can be achieved like this:
+
+    ```javascript
+    const Sequelize = require('sequelize');
+
+    const sequelize = new Sequelize({...});
+    const userExtension = require('./path/to/extensions/User')(sequelize);
+    const User = require('./path/to/User')(sequelize, userExtension, options => {
+        return Object.assign(options, {
+            hooks: {
+                beforeCreate: (instance, options) => {
+                    ...
+                }
+            }
+        });
+    });
+    ...
+    ```
+
+    Default value: `true`
 
 ## Sequelize 5 Configuration
 
