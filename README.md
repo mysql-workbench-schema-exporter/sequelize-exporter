@@ -26,6 +26,7 @@ You then can invoke the CLI script using `vendor/bin/mysql-workbench-schema-expo
 
   * [Sequelize 5](/docs/node-sequelize5.md)
   * [Sequelize 6](/docs/node-sequelize6.md)
+  * [Sequelize 7](/docs/node-sequelize7.md)
 
 ## Command Line Interface (CLI)
 

@@ -1,6 +1,6 @@
 # Node Sequelize Model (v6) Configuration
 
-Auto generated at 2023-04-08T00:04:14+0700.
+Auto generated at 2023-04-28T09:14:39+0700.
 
 ## Global Configuration
 
@@ -9,9 +9,10 @@ Auto generated at 2023-04-08T00:04:14+0700.
     Language detemines which language used to transform singular and plural words
     used in certains other schema like Doctrine.
 
-    Valid values: `english`, `french`, `norwegian-bokmal`, `portuguese`, `spanish`, `turkish`
+    Valid values: `none`, `english`, `french`, `norwegian-bokmal`, `portuguese`, `spanish`,
+    `turkish`
 
-    Default value: `english`
+    Default value: `none`
 
   * `useTab` (alias: `useTabs`)
 
@@ -137,6 +138,13 @@ Auto generated at 2023-04-08T00:04:14+0700.
     Default value: `false`
 
 ## Sequelize Global Configuration
+
+  * `npmPackageName`
+
+    Sequelize NPM package name. For Sequelize 6 package name is `sequelize` while
+    the next version is `@sequelize/core`.
+
+    Default value: `sequelize`
 
   * `commonTableProp`
 
