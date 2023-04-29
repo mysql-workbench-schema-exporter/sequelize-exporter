@@ -28,6 +28,7 @@ namespace MwbExporter\Formatter\Node\Sequelize7;
 
 use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
 use MwbExporter\Formatter\Node\Sequelize6\Formatter as BaseFormatter;
+use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
 {
@@ -41,6 +42,24 @@ class Formatter extends BaseFormatter
         $this->getConfigurations()
             ->merge([PackageNameConfiguration::class => '@sequelize/core'], true)
         ;
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
+     */
+    protected function createDatatypeConverter()
+    {
+        return new DatatypeConverter();
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::createTable()
+     */
+    public function createTable(Base $parent, $node)
+    {
+        return new Model\Table($parent, $node);
     }
 
     /**
