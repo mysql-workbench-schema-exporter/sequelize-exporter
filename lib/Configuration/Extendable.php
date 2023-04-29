@@ -24,14 +24,14 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Configuration;
+namespace MwbExporter\Formatter\Node\Configuration;
 
 use MwbExporter\Configuration\Configuration;
 
 /**
  * Allow table attributes and options to be extended in a such ways to provide
  * extra definitions without modifying generated model files (and thus, being able
- * to regenerate models).
+ * to regenerate models) `Sequelize 6+`.
  *
  * Example scenario:
  *

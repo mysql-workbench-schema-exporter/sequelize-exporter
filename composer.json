@@ -42,7 +42,8 @@
 		"mysql-workbench-schema-exporter" : {
 			"formatters" : {
 				"node-sequelize5" : "MwbExporter\\Formatter\\Node\\Sequelize5\\Formatter",
-				"node-sequelize6" : "MwbExporter\\Formatter\\Node\\Sequelize6\\Formatter"
+				"node-sequelize6" : "MwbExporter\\Formatter\\Node\\Sequelize6\\Formatter",
+				"node-sequelize7" : "MwbExporter\\Formatter\\Node\\Sequelize7\\Formatter"
 			}
 		}
 	}

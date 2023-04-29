@@ -1,6 +1,6 @@
 # Node Sequelize Model (v6) Configuration
 
-Auto generated at 2023-04-08T00:04:14+0700.
+Auto generated at 2023-04-28T09:57:08+0700.
 
 ## Global Configuration
 
@@ -9,9 +9,10 @@ Auto generated at 2023-04-08T00:04:14+0700.
     Language detemines which language used to transform singular and plural words
     used in certains other schema like Doctrine.
 
-    Valid values: `english`, `french`, `norwegian-bokmal`, `portuguese`, `spanish`, `turkish`
+    Valid values: `none`, `english`, `french`, `norwegian-bokmal`, `portuguese`, `spanish`,
+    `turkish`
 
-    Default value: `english`
+    Default value: `none`
 
   * `useTab` (alias: `useTabs`)
 
@@ -138,6 +139,13 @@ Auto generated at 2023-04-08T00:04:14+0700.
 
 ## Sequelize Global Configuration
 
+  * `npmPackageName`
+
+    Sequelize NPM package name. For Sequelize 6 package name is `sequelize` while
+    the next version is `@sequelize/core`.
+
+    Default value: `sequelize`
+
   * `commonTableProp`
 
     Provides a JSON file used as table options override.
@@ -147,8 +155,6 @@ Auto generated at 2023-04-08T00:04:14+0700.
 
     Default value: `blank`
 
-## Sequelize 6 Configuration
-
   * `useSemicolon`
 
     Whether or not to add semicolon to line ending (standard Eslint compliant).
@@ -157,7 +163,7 @@ Auto generated at 2023-04-08T00:04:14+0700.
 
   * `generateForeignKeysField` (alias: `generateForeignKeysFields`)
 
-    Whether or not to generate foreign keys fields.
+    Whether or not to generate foreign keys fields `Sequelize 6+`.
 
     Default value: `true`
 
@@ -165,7 +171,7 @@ Auto generated at 2023-04-08T00:04:14+0700.
 
     Generate association method to define associations between models.
     Each model then has a `associate()` method which can be called
-    to associate the models.
+    to associate the models `Sequelize 6+`.
 
     To use the association is described as follows:
 
@@ -188,7 +194,7 @@ Auto generated at 2023-04-08T00:04:14+0700.
 
     Allow table attributes and options to be extended in a such ways to provide
     extra definitions without modifying generated model files (and thus, being able
-    to regenerate models).
+    to regenerate models) `Sequelize 6+`.
 
     Example scenario:
 
@@ -275,4 +281,9 @@ Auto generated at 2023-04-08T00:04:14+0700.
     ```
 
     Default value: `true`
+
+## Sequelize 6 Configuration
+
+  * No configuration available
+
 

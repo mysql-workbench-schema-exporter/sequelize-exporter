@@ -24,22 +24,23 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Configuration;
+namespace MwbExporter\Formatter\Node\Configuration;
 
 use MwbExporter\Configuration\Configuration;
 
 /**
- * Whether or not to add semicolon to line ending (standard Eslint compliant).
+ * Sequelize NPM package name. For Sequelize 6 package name is `sequelize` while
+ * the next version is `@sequelize/core`.
  *
  * @author Toha <tohenk@yahoo.com>
- * @config useSemicolon
- * @label Use semicolon as line ending
+ * @config npmPackageName
+ * @label Sequelize NPM package name
  */
-class SemiColon extends Configuration
+class PackageName extends Configuration
 {
     protected function initialize()
     {
         $this->category = 'sequelizeConfiguration';
-        $this->defaultValue = true;
+        $this->defaultValue = 'sequelize';
     }
 }

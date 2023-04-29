@@ -24,22 +24,39 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Configuration;
+namespace MwbExporter\Formatter\Node\Configuration;
 
 use MwbExporter\Configuration\Configuration;
 
 /**
- * Whether or not to generate foreign keys fields.
+ * Generate association method to define associations between models.
+ * Each model then has a `associate()` method which can be called
+ * to associate the models `Sequelize 6+`.
+ *
+ * To use the association is described as follows:
+ *
+ * ```javascript
+ * const { Sequelize } = require('sequelize');
+ *
+ * const sequelize = new Sequelize({...});
+ * const MyModel1 = sequelize.import('./path/to/MyModel');
+ * const MyModel2 = sequelize.import('./path/to/MyMode2');
+ * ...
+ *
+ * MyModel1.associate();
+ * MyModel2.associate();
+ * ...
+ * ```
  *
  * @author Toha <tohenk@yahoo.com>
- * @config generateForeignKeysField|generateForeignKeysFields
- * @label Generate foreign key field
+ * @config generateAssociationMethod
+ * @label Generate association method
  */
-class ForeignKey extends Configuration
+class Association extends Configuration
 {
     protected function initialize()
     {
         $this->category = 'sequelizeConfiguration';
-        $this->defaultValue = true;
+        $this->defaultValue = false;
     }
 }
