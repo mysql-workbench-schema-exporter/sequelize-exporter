@@ -98,6 +98,8 @@ class Table extends BaseTable
     {
         $extendable = $this->getConfig(ExtendableConfiguration::class)->getValue();
         $packageName = $this->getConfig(PackageNameConfiguration::class)->getValue();
+        $modelName = $this->getModelName();
+        $modelVarName = lcfirst($modelName);
         /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
         $semicolon = $this->getConfig(SemiColonConfiguration::class);
         $semicolon = $semicolon->getSemiColon();
@@ -119,9 +121,56 @@ class Table extends BaseTable
                     ;
                 }
             })
-            ->write("const { DataTypes } = require('$packageName')$semicolon")
+            ->write("const { Sequelize, DataTypes } = require('$packageName')$semicolon")
             ->write("")
-            ->write("module.exports = %s => {", $extendable ? "(sequelize, attrCallback, optCallback)" : "sequelize")
+            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($extendable) {
+                if ($extendable) {
+                    $writer
+                        ->write("/**")
+                        ->write(" * A callback to transform model attributes.")
+                        ->write(" *")
+                        ->write(" * An example of attributes callback:")
+                        ->write(" *")
+                        ->write(" * ```")
+                        ->write(" * function attrCallback(attributes) {")
+                        ->write(" *     // do something with attributes")
+                        ->write(" *     return attributes;")
+                        ->write(" * }")
+                        ->write(" * ```")
+                        ->write(" *")
+                        ->write(" * @callback attrCallback")
+                        ->write(" * @param {object} attributes Model attributes")
+                        ->write(" * @returns {object}")
+                        ->write(" */")
+                        ->write("")
+                        ->write("/**")
+                        ->write(" * A callback to transform model options.")
+                        ->write(" *")
+                        ->write(" * An example of options callback:")
+                        ->write(" *")
+                        ->write(" * ```")
+                        ->write(" * function optCallback(options) {")
+                        ->write(" *     // do something with options")
+                        ->write(" *     return options;")
+                        ->write(" * }")
+                        ->write(" * ```")
+                        ->write(" *")
+                        ->write(" * @callback optCallback")
+                        ->write(" * @param {object} options Model options")
+                        ->write(" * @returns {object}")
+                        ->write(" */")
+                        ->write("")
+                    ;
+                }
+            })
+            ->write("/**")
+            ->write(" * Define Sequelize model `$modelName`.")
+            ->write(" *")
+            ->write(" * @param {Sequelize} sequelize Sequelize")
+            ->writeIf($extendable, " * @param {attrCallback|null} attrCallback A callback to transform model attributes")
+            ->writeIf($extendable, " * @param {optCallback|null} optCallback A callback to transform model options")
+            ->write(" */")
+            ->write("module.exports = %s => {", $extendable ? "(sequelize, attrCallback = null, optCallback = null)" : "sequelize")
             ->indent()
             ->write("let attributes = %s", $this->asModel())
             ->write("let options = %s", $this->asOptions())
@@ -135,15 +184,16 @@ class Table extends BaseTable
             ->writeIf($extendable, "options = optCallback(options)$semicolon")
             ->outdent()
             ->writeIf($extendable, "}")
-            ->write("const Model = sequelize.define('%s', attributes, options)$semicolon", $this->getModelName())
-            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($semicolon) {
+            ->write("")
+            ->write("const $modelVarName = sequelize.define('$modelName', attributes, options)$semicolon")
+            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
                 if ($_this->getConfig(AssociationConfiguration::class)->getValue()) {
                     $writer
                         ->write("")
-                        ->write("Model.associate = () => {", $this->getModelName())
+                        ->write("$modelVarName.associate = () => {")
                         ->indent()
-                        ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
-                            $_this->writeASsociations($writer);
+                        ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
+                            $_this->writeASsociations($writer, $modelVarName, $semicolon);
                         })
                         ->outdent()
                         ->write("}")
@@ -151,10 +201,9 @@ class Table extends BaseTable
                     ;
                 }
             })
-            ->write("return Model$semicolon")
+            ->write("return $modelVarName$semicolon")
             ->outdent()
             ->write("}")
-            ->write("")
         ;
 
         return $this;
@@ -318,11 +367,8 @@ class Table extends BaseTable
         return $count;
     }
 
-    protected function writeAssociations(WriterInterface $writer)
+    protected function writeAssociations(WriterInterface $writer, $varName, $semicolon)
     {
-        /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
-        $semicolon = $this->getConfig(SemiColonConfiguration::class);
-        $semicolon = $semicolon->getSemiColon();
         $constraints = $this->getConstraints();
 
         // 1 <=> N references
@@ -375,7 +421,7 @@ class Table extends BaseTable
                 ->write($comment)
                 ->write(
                     "%s.%s(sequelize.models.%s, %s)$semicolon",
-                    "Model",
+                    $varName,
                     $associationMethod,
                     $targetEntity,
                     $this->getJSObject($options)
@@ -426,7 +472,7 @@ class Table extends BaseTable
                 ->write($comment)
                 ->write(
                     "%s.%s(sequelize.models.%s, %s)$semicolon",
-                    "Model",
+                    $varName,
                     $associationMethod,
                     $targetEntity,
                     $this->getJSObject($options)
@@ -445,7 +491,7 @@ class Table extends BaseTable
                 ->write('// N <=> M association')
                 ->write(
                     "%s.belongsToMany(sequelize.models.%s, %s)$semicolon",
-                    "Model",
+                    $varName,
                     $relation['refTable']->getModelName(),
                     $this->getJSObject($options)
                 );
