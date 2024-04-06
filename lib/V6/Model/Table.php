@@ -98,8 +98,7 @@ class Table extends BaseTable
     {
         $extendable = $this->getConfig(ExtendableConfiguration::class)->getValue();
         $packageName = $this->getConfig(PackageNameConfiguration::class)->getValue();
-        $modelName = $this->getModelName();
-        $modelVarName = lcfirst($modelName);
+        $modelName = $modelVarName = $this->getModelName();
         /** @var MwbExporter\Formatter\Sequelize\Configuration\SemiColon $semicolon */
         $semicolon = $this->getConfig(SemiColonConfiguration::class);
         $semicolon = $semicolon->getSemiColon();
