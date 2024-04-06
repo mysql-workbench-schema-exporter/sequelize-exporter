@@ -36,6 +36,7 @@ use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Configuration\NamingStrategy as NamingStrategyConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
 use MwbExporter\Formatter\Sequelize\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\AssociationAlias as AssociationAliasConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\Extendable as ExtendableConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\ForeignKey as ForeignKeyConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
@@ -369,8 +370,12 @@ class Table extends BaseTable
     protected function writeAssociations(WriterInterface $writer, $varName, $semicolon)
     {
         $constraints = $this->getConstraints();
+        $associationAlias = $this->getConfig(AssociationAliasConfiguration::class)->getValue();
 
         // 1 <=> N references
+        if (count($this->getAllLocalForeignKeys())) {
+            $this->getDocument()->addLog(sprintf('+ Writing 1 to N association for %s:', $this->getModelName()));
+        }
         foreach ($this->getAllLocalForeignKeys() as $fk) {
             if ($this->isLocalForeignKeyIgnored($fk)) {
                 $this->getDocument()->addLog(sprintf('  Local relation "%s" was ignored', $fk->getOwningTable()->getModelName()));
@@ -380,7 +385,6 @@ class Table extends BaseTable
             $targetEntity = $fk->getOwningTable()->getModelName();
             $relatedColumnName = $fk->getLocal()->getColumnName();
 
-            $as = null;
             $count = $this->countFkOwnerReferences($targetEntity);
             if ($count > 1) {
                 // generate association as OtherModelByColumnName
@@ -389,35 +393,34 @@ class Table extends BaseTable
                 $as = $this->pluralize($targetEntity);
             }
             // skip alias if same as target entity
-            if ($as === $targetEntity) {
+            if ($as === $targetEntity && !$associationAlias) {
                 $as = null;
             }
 
-            $inverse = null;
             if ($count > 1) {
                 $inverse = $this->getNaming(sprintf('%s_related_by_%s', $this->getModelName(), $relatedColumnName), $this->associationNaming, true);
-            } elseif (in_array($this->getModelName(), $fk->getOwningTable()->getColumns()->getColumnNames())) {
+            } else if (in_array($this->getModelName(), $fk->getOwningTable()->getColumns()->getColumnNames())) {
                 $inverse = $this->getNaming(sprintf('%s_fk', $this->getModelName()), $this->associationNaming, true);
+            } else {
+                $inverse = $associationAlias ? $this->getModelName() : null;
             }
 
             if (!($options = $this->getAssociationOne($fk, $as, $inverse, $constraints[$targetEntity]))) {
                 continue;
             }
 
-            $this->getDocument()->addLog(sprintf('  Writing 1 <=> ? relation "%s"', $targetEntity));
-
             if ($fk->isManyToOne()) {
-                $this->getDocument()->addLog('  Relation considered as "1 <=> N"');
-                $comment = '// 1 <=> N association';
                 $associationMethod = 'hasMany';
+                $associationType = '1 <=> N';
             } else {
-                $this->getDocument()->addLog('  Relation considered as "1 <=> 1"');
-                $comment = '// 1 <=> 1 association';
                 $associationMethod = 'hasOne';
+                $associationType = '1 <=> 1';
             }
 
+            $this->getDocument()->addLog(sprintf('  Writing %s relation of %s as %s', $associationType, $targetEntity, null !== $as ? $as : 'is'));
+
             $writer
-                ->write($comment)
+                ->write("// $associationType")
                 ->write(
                     "%s.%s(sequelize.models.%s, %s)$semicolon",
                     $varName,
@@ -428,6 +431,9 @@ class Table extends BaseTable
         }
 
         // N <=> 1 references
+        if (count($this->getAllForeignKeys())) {
+            $this->getDocument()->addLog(sprintf('+ Writing N to 1 association for %s:', $this->getModelName()));
+        }
         foreach ($this->getAllForeignKeys() as $fk) {
             if ($this->isForeignKeyIgnored($fk)) {
                 $this->getDocument()->addLog(sprintf('  Foreign relation "%s" was ignored', $fk->getOwningTable()->getModelName()));
@@ -439,16 +445,17 @@ class Table extends BaseTable
             $targetEntity = $refTable->getModelName();
             $relatedColumnName = $fk->getLocal()->getColumnName();
 
-            $as = null;
             $count = $refTable->countFkOwnerReferences($this->getModelName());
             if ($count > 1) {
                 $as = $this->getNaming(sprintf('%s_related_by_%s', $targetEntity, $relatedColumnName), $this->associationNaming, true);
-            } elseif (in_array($targetEntity, $fk->getOwningTable()->getColumns()->getColumnNames())) {
+            } else if (in_array($targetEntity, $fk->getOwningTable()->getColumns()->getColumnNames())) {
                 $as = $this->getNaming(sprintf('%s_fk', $targetEntity), $this->associationNaming, true);
+            } else {
+                $as = $targetEntity;
             }
 
             // If alias is the same as foreign model, don't use it
-            if ($as === $targetEntity) {
+            if ($as === $targetEntity && !$associationAlias) {
                 $as = null;
             }
 
@@ -457,18 +464,16 @@ class Table extends BaseTable
             }
 
             $associationMethod = 'belongsTo';
-            $this->getDocument()->addLog(sprintf('  Writing N <=> ? relation "%s"', $targetEntity));
-
             if ($fk->isManyToOne()) {
-                $this->getDocument()->addLog('  Relation considered as "N <=> 1"');
-                $comment = '// N <=> 1 association';
+                $associationType = 'N <=> 1';
             } else {
-                $this->getDocument()->addLog('  Relation considered as "1 <=> 1"');
-                $comment = '// 1 <=> 1 association';
+                $associationType = '1 <=> 1';
             }
 
+            $this->getDocument()->addLog(sprintf('  Writing %s relation of %s as %s', $associationType, $targetEntity, null !== $as ? $as : 'is'));
+
             $writer
-                ->write($comment)
+                ->write("// $associationType")
                 ->write(
                     "%s.%s(sequelize.models.%s, %s)$semicolon",
                     $varName,
@@ -478,7 +483,10 @@ class Table extends BaseTable
                 );
         }
 
-        // N <=> M associations
+        // N <=> N associations
+        if (count($this->getTableM2MRelations())) {
+            $this->getDocument()->addLog(sprintf('+ Writing N to N association for %s:', $this->getModelName()));
+        }
         foreach ($this->getTableM2MRelations() as $relation) {
             $this->getDocument()->addLog(sprintf('  Writing setter/getter for N <=> N "%s"', $relation['refTable']->getModelName()));
 
@@ -487,7 +495,7 @@ class Table extends BaseTable
             }
 
             $writer
-                ->write('// N <=> M association')
+                ->write('// N <=> N')
                 ->write(
                     "%s.belongsToMany(sequelize.models.%s, %s)$semicolon",
                     $varName,

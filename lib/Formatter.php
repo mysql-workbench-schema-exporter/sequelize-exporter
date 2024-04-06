@@ -30,6 +30,7 @@ namespace MwbExporter\Formatter\Sequelize;
 use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Formatter\Formatter as BaseFormatter;
 use MwbExporter\Formatter\Sequelize\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\AssociationAlias as AssociationAliasConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\Extendable as ExtendableConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\ForeignKey as ForeignKeyConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
@@ -51,6 +52,7 @@ abstract class Formatter extends BaseFormatter
             ->add(new SemiColonConfiguration())
             ->add(new ForeignKeyConfiguration())
             ->add(new AssociationConfiguration())
+            ->add(new AssociationAliasConfiguration())
             ->add(new ExtendableConfiguration())
             ->merge([IndentationConfiguration::class => 4], true)
         ;

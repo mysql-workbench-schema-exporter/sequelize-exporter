@@ -1,6 +1,6 @@
 # Sequelize Model (v5) Configuration
 
-Auto generated at 2023-04-28T09:57:08+0700.
+Auto generated at 2024-04-07T01:23:12+0700.
 
 ## Global Configuration
 
@@ -187,6 +187,14 @@ Auto generated at 2023-04-28T09:57:08+0700.
     MyModel2.associate();
     ...
     ```
+
+    Default value: `false`
+
+  * `alwaysGenerateAssociationAlias`
+
+    Allows to always generate association alias (`as`) when association is enabled.
+    Association alias by default will be omitted if the generated model is same as
+    referenced model `Sequelize 6+`.
 
     Default value: `false`
 
