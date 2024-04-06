@@ -25,16 +25,16 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node;
+namespace MwbExporter\Formatter\Sequelize;
 
 use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Formatter\Formatter as BaseFormatter;
-use MwbExporter\Formatter\Node\Configuration\Association as AssociationConfiguration;
-use MwbExporter\Formatter\Node\Configuration\Extendable as ExtendableConfiguration;
-use MwbExporter\Formatter\Node\Configuration\ForeignKey as ForeignKeyConfiguration;
-use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
-use MwbExporter\Formatter\Node\Configuration\SemiColon as SemiColonConfiguration;
-use MwbExporter\Formatter\Node\Configuration\TableProp as TablePropConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\Extendable as ExtendableConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\ForeignKey as ForeignKeyConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\TableProp as TablePropConfiguration;
 
 abstract class Formatter extends BaseFormatter
 {

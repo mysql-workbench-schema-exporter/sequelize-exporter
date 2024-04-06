@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Configuration;
+namespace MwbExporter\Formatter\Sequelize\Configuration;
 
 use MwbExporter\Configuration\Configuration;
 

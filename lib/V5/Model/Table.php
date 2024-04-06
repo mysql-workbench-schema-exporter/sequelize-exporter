@@ -26,14 +26,14 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize5\Model;
+namespace MwbExporter\Formatter\Sequelize\V5\Model;
 
 use MwbExporter\Configuration\Comment as CommentConfiguration;
 use MwbExporter\Configuration\Header as HeaderConfiguration;
 use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
-use MwbExporter\Formatter\Node\Configuration\SemiColon as SemiColonConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Helper\Comment;
 use MwbExporter\Model\Table as BaseTable;
 use MwbExporter\Object\JS;
@@ -81,11 +81,11 @@ class Table extends BaseTable
      * Write model body code.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
-     * @return \MwbExporter\Formatter\Node\Sequelize5\Model\Table
+     * @return \MwbExporter\Formatter\Sequelize\V5\Model\Table
      */
     protected function writeBody(WriterInterface $writer)
     {
-        /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
+        /** @var MwbExporter\Formatter\Sequelize\Configuration\SemiColon $semicolon */
         $semicolon = $this->getConfig(SemiColonConfiguration::class);
         $semicolon = $semicolon->getSemiColon();
 
@@ -118,7 +118,7 @@ class Table extends BaseTable
 
     protected function asOptions()
     {
-        /** @var \MwbExporter\Formatter\Node\Formatter $formatter */
+        /** @var \MwbExporter\Formatter\Sequelize\Formatter $formatter */
         $formatter = $this->getFormatter();
         $result = array_merge([
             'tableName' => $this->getRawTableName(),

@@ -27,7 +27,7 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Model;
+namespace MwbExporter\Formatter\Sequelize\V6\Model;
 
 use MwbExporter\Configuration\Comment as CommentConfiguration;
 use MwbExporter\Configuration\Header as HeaderConfiguration;
@@ -35,11 +35,11 @@ use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Configuration\NamingStrategy as NamingStrategyConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
-use MwbExporter\Formatter\Node\Configuration\Association as AssociationConfiguration;
-use MwbExporter\Formatter\Node\Configuration\Extendable as ExtendableConfiguration;
-use MwbExporter\Formatter\Node\Configuration\ForeignKey as ForeignKeyConfiguration;
-use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
-use MwbExporter\Formatter\Node\Configuration\SemiColon as SemiColonConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\Association as AssociationConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\Extendable as ExtendableConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\ForeignKey as ForeignKeyConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
+use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Helper\Comment;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Model\Table as BaseTable;
@@ -92,7 +92,7 @@ class Table extends BaseTable
      * Write model body code.
      *
      * @param \MwbExporter\Writer\WriterInterface $writer
-     * @return \MwbExporter\Formatter\Node\Sequelize6\Model\Table
+     * @return \MwbExporter\Formatter\Sequelize\V6\Model\Table
      */
     protected function writeBody(WriterInterface $writer)
     {
@@ -100,7 +100,7 @@ class Table extends BaseTable
         $packageName = $this->getConfig(PackageNameConfiguration::class)->getValue();
         $modelName = $this->getModelName();
         $modelVarName = lcfirst($modelName);
-        /** @var MwbExporter\Formatter\Node\Configuration\SemiColon $semicolon */
+        /** @var MwbExporter\Formatter\Sequelize\Configuration\SemiColon $semicolon */
         $semicolon = $this->getConfig(SemiColonConfiguration::class);
         $semicolon = $semicolon->getSemiColon();
 
@@ -211,7 +211,7 @@ class Table extends BaseTable
 
     protected function asOptions()
     {
-        /** @var \MwbExporter\Formatter\Node\Formatter */
+        /** @var \MwbExporter\Formatter\Sequelize\Formatter */
         $formatter = $this->getFormatter();
         $result = array_merge([
             'sequelize' => $this->getJSObject('sequelize', false, true),
@@ -238,7 +238,7 @@ class Table extends BaseTable
     protected function getFields()
     {
         $result = [];
-        /** @var \MwbExporter\Formatter\Node\Sequelize6\Model\Column $column */
+        /** @var \MwbExporter\Formatter\Sequelize\V6\Model\Column $column */
         foreach ($this->getColumns() as $column) {
             if (!$this->getConfig(ForeignKeyConfiguration::class)->getValue() && count($column->getForeignKeys())) {
                 continue;
@@ -435,7 +435,7 @@ class Table extends BaseTable
                 continue;
             }
 
-            /** @var \MwbExporter\Formatter\Node\Sequelize6\Model\Table $refTable */
+            /** @var \MwbExporter\Formatter\Sequelize\V6\Model\Table $refTable */
             $refTable = $fk->getReferencedTable();
             $targetEntity = $refTable->getModelName();
             $relatedColumnName = $fk->getLocal()->getColumnName();

@@ -26,9 +26,9 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6;
+namespace MwbExporter\Formatter\Sequelize\V5;
 
-use MwbExporter\Formatter\Node\DatatypeConverter as BaseDatatypeConverter;
+use MwbExporter\Formatter\Sequelize\DatatypeConverter as BaseDatatypeConverter;
 
 class DatatypeConverter extends BaseDatatypeConverter
 {

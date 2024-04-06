@@ -1,15 +1,15 @@
 {
-	"name" : "mysql-workbench-schema-exporter/node-exporter",
+	"name" : "mysql-workbench-schema-exporter/sequelize-exporter",
 	"type" : "library",
-	"description" : "MySQL Workbench Schema Exporter for Sequelizejs",
+	"description" : "MySQL Workbench Schema Exporter for Sequelize",
 	"keywords" : [
 		"mysql",
 		"mysql workbench",
 		"database",
 		"cli",
-		"sequelizejs"
+		"sequelize"
 	],
-	"homepage" : "https://github.com/mysql-workbench-schema-exporter/node-exporter",
+	"homepage" : "https://github.com/mysql-workbench-schema-exporter/sequelize-exporter",
 	"license" : "MIT",
 	"authors" : [{
 			"name" : "Johannes Mueller",
@@ -35,15 +35,15 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"MwbExporter\\Formatter\\Node\\" : "lib/"
+			"MwbExporter\\Formatter\\Sequelize\\" : "lib/"
 		}
 	},
 	"extra": {
 		"mysql-workbench-schema-exporter" : {
 			"formatters" : {
-				"node-sequelize5" : "MwbExporter\\Formatter\\Node\\Sequelize5\\Formatter",
-				"node-sequelize6" : "MwbExporter\\Formatter\\Node\\Sequelize6\\Formatter",
-				"node-sequelize7" : "MwbExporter\\Formatter\\Node\\Sequelize7\\Formatter"
+				"sequelize-v5" : "MwbExporter\\Formatter\\Sequelize\\V5\\Formatter",
+				"sequelize-v6" : "MwbExporter\\Formatter\\Sequelize\\V6\\Formatter",
+				"sequelize-v7" : "MwbExporter\\Formatter\\Sequelize\\V7\\Formatter"
 			}
 		}
 	}
