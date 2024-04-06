@@ -3,10 +3,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
  * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
- * Copyright (c) 2013 WitteStier <development@wittestier.nl>
- * Copyright (c) 2021 Marc-Olivier Laux <marco@matlaux.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,27 +24,20 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize6\Model;
+namespace MwbExporter\Formatter\Sequelize\V7;
 
-use MwbExporter\Model\Column as BaseColumn;
+use MwbExporter\Formatter\Sequelize\DatatypeConverter as BaseDatatypeConverter;
 
-class Column extends BaseColumn
+class DatatypeConverter extends BaseDatatypeConverter
 {
-    /**
-     * return true if the column is a primary key
-     *
-     * @return boolean
-     */
-    public function isUnique()
+    public function setup()
     {
-        if ($this->isUnique) {
-            foreach ($this->getTable()->getIndices() as $index) {
-                if ($index->isUnique() && count($index->getColumns()) === 1 && $index->getColumns()[0] === $this) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        parent::setup();
+        $this->register([
+            static::DATATYPE_DATE => 'DATEONLY',
+            static::DATATYPE_DATE_F => 'DATEONLY',
+            static::DATATYPE_TIME => 'TIME',
+            static::DATATYPE_TIME_F => 'TIME',
+        ]);
     }
 }

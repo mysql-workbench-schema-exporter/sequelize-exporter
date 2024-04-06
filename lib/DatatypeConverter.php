@@ -25,7 +25,7 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node;
+namespace MwbExporter\Formatter\Sequelize;
 
 use MwbExporter\Formatter\DatatypeConverter as BaseDatatypeConverter;
 

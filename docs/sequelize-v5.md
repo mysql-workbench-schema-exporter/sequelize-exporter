@@ -1,4 +1,4 @@
-# Node Sequelize Model (v6) Configuration
+# Sequelize Model (v5) Configuration
 
 Auto generated at 2023-04-28T09:57:08+0700.
 
@@ -282,7 +282,7 @@ Auto generated at 2023-04-28T09:57:08+0700.
 
     Default value: `true`
 
-## Sequelize 6 Configuration
+## Sequelize 5 Configuration
 
   * No configuration available
 

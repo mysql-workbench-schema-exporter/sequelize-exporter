@@ -24,9 +24,9 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize7\Model;
+namespace MwbExporter\Formatter\Sequelize\V7\Model;
 
-use MwbExporter\Formatter\Node\Sequelize6\Model\Table as BaseTable;
+use MwbExporter\Formatter\Sequelize\V6\Model\Table as BaseTable;
 
 class Table extends BaseTable
 {

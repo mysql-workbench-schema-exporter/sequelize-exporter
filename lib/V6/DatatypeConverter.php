@@ -26,47 +26,10 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize5;
+namespace MwbExporter\Formatter\Sequelize\V6;
 
-use MwbExporter\Formatter\Node\Formatter as BaseFormatter;
-use MwbExporter\Model\Base;
+use MwbExporter\Formatter\Sequelize\DatatypeConverter as BaseDatatypeConverter;
 
-class Formatter extends BaseFormatter
+class DatatypeConverter extends BaseDatatypeConverter
 {
-    /**
-     * (non-PHPdoc)
-     * @see \MwbExporter\Formatter\Formatter::createDatatypeConverter()
-     */
-    protected function createDatatypeConverter()
-    {
-        return new DatatypeConverter();
-    }
-
-    /**
-     * (non-PHPdoc)
-     * @see \MwbExporter\Formatter\Formatter::createTable()
-     */
-    public function createTable(Base $parent, $node)
-    {
-        return new Model\Table($parent, $node);
-    }
-
-    /**
-     * (non-PHPdoc)
-     * @see \MwbExporter\Formatter\Formatter::getTitle()
-     */
-    public function getTitle()
-    {
-        return 'Node Sequelize Model (v5)';
-    }
-
-    /**
-     * Get configuration scope.
-     *
-     * @return string
-     */
-    public static function getScope()
-    {
-        return 'Sequelize 5';
-    }
 }

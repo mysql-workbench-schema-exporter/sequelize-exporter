@@ -1,5 +1,5 @@
 {
-    "export": "node-sequelize5",
+    "export": "sequelize-v5",
     "zip": false,
     "dir": "build",
     "params": {

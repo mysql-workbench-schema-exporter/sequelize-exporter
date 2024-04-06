@@ -1,5 +1,5 @@
 {
-    "export": "node-sequelize6",
+    "export": "sequelize-v6",
     "zip": false,
     "dir": "build",
     "params": {

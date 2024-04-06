@@ -3,7 +3,9 @@
 /*
  * The MIT License
  *
+ * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
  * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +26,10 @@
  * THE SOFTWARE.
  */
 
-namespace MwbExporter\Formatter\Node\Sequelize7;
+namespace MwbExporter\Formatter\Sequelize\V6;
 
-use MwbExporter\Formatter\Node\Configuration\PackageName as PackageNameConfiguration;
-use MwbExporter\Formatter\Node\Sequelize6\Formatter as BaseFormatter;
+use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
+use MwbExporter\Formatter\Sequelize\Formatter as BaseFormatter;
 use MwbExporter\Model\Base;
 
 class Formatter extends BaseFormatter
@@ -40,7 +42,7 @@ class Formatter extends BaseFormatter
     {
         parent::init();
         $this->getConfigurations()
-            ->merge([PackageNameConfiguration::class => '@sequelize/core'], true)
+            ->merge([PackageNameConfiguration::class => 'sequelize'], true)
         ;
     }
 
@@ -64,11 +66,20 @@ class Formatter extends BaseFormatter
 
     /**
      * (non-PHPdoc)
+     * @see \MwbExporter\Formatter\Formatter::createColumn()
+     */
+    public function createColumn(Base $parent, $node)
+    {
+        return new Model\Column($parent, $node);
+    }
+
+    /**
+     * (non-PHPdoc)
      * @see \MwbExporter\Formatter\Formatter::getTitle()
      */
     public function getTitle()
     {
-        return 'Node Sequelize Model (v7)';
+        return 'Sequelize Model (v6)';
     }
 
     /**
@@ -78,6 +89,6 @@ class Formatter extends BaseFormatter
      */
     public static function getScope()
     {
-        return 'Sequelize 7';
+        return 'Sequelize 6';
     }
 }

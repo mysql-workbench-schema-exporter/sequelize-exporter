@@ -1,4 +1,4 @@
-# Node Sequelize Model (v7) Configuration
+# Sequelize Model (v6) Configuration
 
 Auto generated at 2023-04-28T09:57:08+0700.
 
@@ -144,7 +144,7 @@ Auto generated at 2023-04-28T09:57:08+0700.
     Sequelize NPM package name. For Sequelize 6 package name is `sequelize` while
     the next version is `@sequelize/core`.
 
-    Default value: `@sequelize/core`
+    Default value: `sequelize`
 
   * `commonTableProp`
 
@@ -283,11 +283,6 @@ Auto generated at 2023-04-28T09:57:08+0700.
     Default value: `true`
 
 ## Sequelize 6 Configuration
-
-  * No configuration available
-
-
-## Sequelize 7 Configuration
 
   * No configuration available
 
