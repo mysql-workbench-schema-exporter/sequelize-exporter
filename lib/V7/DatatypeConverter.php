@@ -26,6 +26,7 @@
 
 namespace MwbExporter\Formatter\Sequelize\V7;
 
+use MwbExporter\Formatter\Sequelize\Configuration\Dialect as DialectConfiguration;
 use MwbExporter\Formatter\Sequelize\DatatypeConverter as BaseDatatypeConverter;
 
 class DatatypeConverter extends BaseDatatypeConverter
@@ -39,5 +40,23 @@ class DatatypeConverter extends BaseDatatypeConverter
             static::DATATYPE_TIME => 'TIME',
             static::DATATYPE_TIME_F => 'TIME',
         ]);
+    }
+
+    public function transformDataType($key, $dataType)
+    {
+        // @see https://sequelize.org/docs/v7/models/data-types/
+        $dialect = $this->formatter->getConfig(DialectConfiguration::class)->getValue();
+        if ($dialect === DialectConfiguration::SQLITE) {
+            // SQLite doesn't support blob size
+            if (in_array($key, [static::DATATYPE_TINYBLOB, static::DATATYPE_MEDIUMBLOB, static::DATATYPE_LONGBLOB])) {
+                $dataType = $this->dataTypes[static::DATATYPE_BLOB];
+            }
+            // SQLite doesn't support text size
+            if (in_array($key, [static::DATATYPE_TINYTEXT, static::DATATYPE_MEDIUMTEXT, static::DATATYPE_LONGTEXT])) {
+                $dataType = $this->dataTypes[static::DATATYPE_TEXT];
+            }
+        }
+
+        return $dataType;
     }
 }

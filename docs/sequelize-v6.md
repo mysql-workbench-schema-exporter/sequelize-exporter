@@ -1,6 +1,6 @@
 # Sequelize Model (v6) Configuration
 
-Auto generated at 2024-04-07T01:23:12+0700.
+Auto generated at 2024-04-09T13:24:53+0700.
 
 ## Global Configuration
 
@@ -145,6 +145,17 @@ Auto generated at 2024-04-07T01:23:12+0700.
     the next version is `@sequelize/core`.
 
     Default value: `sequelize`
+
+  * `databaseDialect`
+
+    Sequelize database dialect used for model definition. Some database dialect
+    can produce different model definition, choose the right dialect to target
+    for model generation.
+
+    Valid values: `none`, `db2`, `ibmi`, `mariadb`, `mssql`, `mysql`, `postgres`, `snowflake`,
+    `sqlite`
+
+    Default value: `none`
 
   * `commonTableProp`
 
