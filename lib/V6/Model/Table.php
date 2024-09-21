@@ -44,8 +44,8 @@ use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfigur
 use MwbExporter\Helper\Comment;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Model\Table as BaseTable;
-use MwbExporter\Object\JS;
 use MwbExporter\Writer\WriterInterface;
+use NTLAB\Object\JS;
 
 class Table extends BaseTable
 {
@@ -59,7 +59,7 @@ class Table extends BaseTable
      * @param mixed $content    Object content
      * @param bool  $multiline  Multiline result
      * @param bool  $raw        Is raw object
-     * @return \MwbExporter\Object\JS
+     * @return \NTLAB\Object\JS
      */
     public function getJSObject($content, $multiline = true, $raw = false)
     {
@@ -68,7 +68,7 @@ class Table extends BaseTable
 
         return new JS($content, [
             'indentation' => $indentation->getIndentation(1),
-            'multiline' => $multiline,
+            'inline' => !$multiline,
             'raw' => $raw,
         ]);
     }
