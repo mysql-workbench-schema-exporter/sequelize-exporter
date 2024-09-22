@@ -37,6 +37,7 @@ use MwbExporter\Formatter\Sequelize\Configuration\ForeignKey as ForeignKeyConfig
 use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\TableProp as TablePropConfiguration;
+use MwbExporter\Helper\Comment;
 
 abstract class Formatter extends BaseFormatter
 {
@@ -58,6 +59,7 @@ abstract class Formatter extends BaseFormatter
             ->add(new ExtendableConfiguration())
             ->merge([IndentationConfiguration::class => 4], true)
         ;
+        $this->commentFormat = Comment::FORMAT_JS;
     }
 
     public function getVersion()

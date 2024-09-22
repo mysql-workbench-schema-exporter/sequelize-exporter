@@ -34,7 +34,6 @@ use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
 use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
-use MwbExporter\Helper\Comment;
 use MwbExporter\Model\Table as BaseTable;
 use MwbExporter\Writer\WriterInterface;
 use NTLAB\Object\JS;
@@ -95,15 +94,21 @@ class Table extends BaseTable
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
                     $writer
-                        ->write($_this->getFormatter()->getFormattedComment($content, Comment::FORMAT_JS, null))
+                        ->commentStart()
+                            ->write($content)
+                        ->commentEnd()
                         ->write('')
                     ;
                 }
                 if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
-                    $writer
-                        ->write($_this->getFormatter()->getComment(Comment::FORMAT_JS))
-                        ->write('')
-                    ;
+                    if ($content = $_this->getFormatter()->getComment(null)) {
+                        $writer
+                            ->commentStart()
+                                ->write($content)
+                            ->commentEnd()
+                            ->write('')
+                        ;
+                    }
                 }
             })
             ->write("module.exports = function(sequelize, DataTypes) {")

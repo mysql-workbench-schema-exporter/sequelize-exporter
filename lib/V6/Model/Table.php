@@ -41,7 +41,6 @@ use MwbExporter\Formatter\Sequelize\Configuration\Extendable as ExtendableConfig
 use MwbExporter\Formatter\Sequelize\Configuration\ForeignKey as ForeignKeyConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\PackageName as PackageNameConfiguration;
 use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
-use MwbExporter\Helper\Comment;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Model\Table as BaseTable;
 use MwbExporter\Writer\WriterInterface;
@@ -110,15 +109,21 @@ class Table extends BaseTable
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
                     $writer
-                        ->write($_this->getFormatter()->getFormattedComment($content, Comment::FORMAT_JS, null))
+                        ->commentStart()
+                            ->write($content)
+                        ->commentEnd()
                         ->write('')
                     ;
                 }
                 if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
-                    $writer
-                        ->write($_this->getFormatter()->getComment(Comment::FORMAT_JS))
-                        ->write('')
-                    ;
+                    if ($content = $_this->getFormatter()->getComment(null)) {
+                        $writer
+                            ->commentStart()
+                                ->write($content)
+                            ->commentEnd()
+                            ->write('')
+                        ;
+                    }
                 }
             })
             ->write("const { Sequelize, DataTypes } = require('$packageName')$semicolon")
@@ -126,82 +131,82 @@ class Table extends BaseTable
             ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($extendable) {
                 if ($extendable) {
                     $writer
-                        ->write("/**")
-                        ->write(" * A callback to transform model attributes.")
-                        ->write(" *")
-                        ->write(" * An example of attributes callback:")
-                        ->write(" *")
-                        ->write(" * ```")
-                        ->write(" * function attrCallback(attributes) {")
-                        ->write(" *     // do something with attributes")
-                        ->write(" *     return attributes;")
-                        ->write(" * }")
-                        ->write(" * ```")
-                        ->write(" *")
-                        ->write(" * @callback attrCallback")
-                        ->write(" * @param {object} attributes Model attributes")
-                        ->write(" * @returns {object}")
-                        ->write(" */")
+                        ->commentStart("/**")
+                            ->write("A callback to transform model attributes.")
+                            ->write("")
+                            ->write("An example of attributes callback:")
+                            ->write("")
+                            ->write("```")
+                            ->write("function attrCallback(attributes) {")
+                            ->write("    // do something with attributes")
+                            ->write("    return attributes;")
+                            ->write("}")
+                            ->write("```")
+                            ->write("")
+                            ->write("@callback attrCallback")
+                            ->write("@param {object} attributes Model attributes")
+                            ->write("@returns {object}")
+                        ->commentEnd()
                         ->write("")
-                        ->write("/**")
-                        ->write(" * A callback to transform model options.")
-                        ->write(" *")
-                        ->write(" * An example of options callback:")
-                        ->write(" *")
-                        ->write(" * ```")
-                        ->write(" * function optCallback(options) {")
-                        ->write(" *     // do something with options")
-                        ->write(" *     return options;")
-                        ->write(" * }")
-                        ->write(" * ```")
-                        ->write(" *")
-                        ->write(" * @callback optCallback")
-                        ->write(" * @param {object} options Model options")
-                        ->write(" * @returns {object}")
-                        ->write(" */")
+                        ->commentStart()
+                            ->write("A callback to transform model options.")
+                            ->write("")
+                            ->write("An example of options callback:")
+                            ->write("")
+                            ->write("```")
+                            ->write("function optCallback(options) {")
+                            ->write("    // do something with options")
+                            ->write("    return options;")
+                            ->write("}")
+                            ->write("```")
+                            ->write("")
+                            ->write("@callback optCallback")
+                            ->write("@param {object} options Model options")
+                            ->write("@returns {object}")
+                        ->commentEnd()
                         ->write("")
                     ;
                 }
             })
-            ->write("/**")
-            ->write(" * Define Sequelize model `$modelName`.")
-            ->write(" *")
-            ->write(" * @param {Sequelize} sequelize Sequelize")
-            ->writeIf($extendable, " * @param {attrCallback|null} attrCallback A callback to transform model attributes")
-            ->writeIf($extendable, " * @param {optCallback|null} optCallback A callback to transform model options")
-            ->write(" */")
+            ->commentStart()
+                ->write("Define Sequelize model `$modelName`.")
+                ->write("")
+                ->write("@param {Sequelize} sequelize Sequelize")
+                ->writeIf($extendable, "@param {attrCallback|null} attrCallback A callback to transform model attributes")
+                ->writeIf($extendable, "@param {optCallback|null} optCallback A callback to transform model options")
+            ->commentEnd()
             ->write("module.exports = %s => {", $extendable ? "(sequelize, attrCallback = null, optCallback = null)" : "sequelize")
             ->indent()
-            ->write("let attributes = %s", $this->asModel())
-            ->write("let options = %s", $this->asOptions())
-            ->writeIf($extendable, "if (typeof attrCallback === 'function') {")
-            ->indent()
-            ->writeIf($extendable, "attributes = attrCallback(attributes)$semicolon")
-            ->outdent()
-            ->writeIf($extendable, "}")
-            ->writeIf($extendable, "if (typeof optCallback === 'function') {")
-            ->indent()
-            ->writeIf($extendable, "options = optCallback(options)$semicolon")
-            ->outdent()
-            ->writeIf($extendable, "}")
-            ->write("")
-            ->write("const $modelVarName = sequelize.define('$modelName', attributes, options)$semicolon")
-            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
-                if ($_this->getConfig(AssociationConfiguration::class)->getValue()) {
-                    $writer
-                        ->write("")
-                        ->write("$modelVarName.associate = () => {")
-                        ->indent()
-                        ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
-                            $_this->writeASsociations($writer, $modelVarName, $semicolon);
-                        })
-                        ->outdent()
-                        ->write("}")
-                        ->write("")
-                    ;
-                }
-            })
-            ->write("return $modelVarName$semicolon")
+                ->write("let attributes = %s", $this->asModel())
+                ->write("let options = %s", $this->asOptions())
+                ->writeIf($extendable, "if (typeof attrCallback === 'function') {")
+                ->indent()
+                    ->writeIf($extendable, "attributes = attrCallback(attributes)$semicolon")
+                ->outdent()
+                ->writeIf($extendable, "}")
+                ->writeIf($extendable, "if (typeof optCallback === 'function') {")
+                ->indent()
+                    ->writeIf($extendable, "options = optCallback(options)$semicolon")
+                ->outdent()
+                ->writeIf($extendable, "}")
+                ->write("")
+                ->write("const $modelVarName = sequelize.define('$modelName', attributes, options)$semicolon")
+                ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
+                    if ($_this->getConfig(AssociationConfiguration::class)->getValue()) {
+                        $writer
+                            ->write("")
+                            ->write("$modelVarName.associate = () => {")
+                            ->indent()
+                            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
+                                $_this->writeASsociations($writer, $modelVarName, $semicolon);
+                            })
+                            ->outdent()
+                            ->write("}")
+                            ->write("")
+                        ;
+                    }
+                })
+                ->write("return $modelVarName$semicolon")
             ->outdent()
             ->write("}")
         ;
