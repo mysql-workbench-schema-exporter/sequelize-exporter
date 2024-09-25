@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2024 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,10 +34,9 @@ use MwbExporter\Configuration\Indentation as IndentationConfiguration;
 use MwbExporter\Configuration\M2MSkip as M2MSkipConfiguration;
 use MwbExporter\Formatter\DatatypeConverterInterface;
 use MwbExporter\Formatter\Sequelize\Configuration\SemiColon as SemiColonConfiguration;
-use MwbExporter\Helper\Comment;
 use MwbExporter\Model\Table as BaseTable;
-use MwbExporter\Object\JS;
 use MwbExporter\Writer\WriterInterface;
+use NTLAB\Object\JS;
 
 class Table extends BaseTable
 {
@@ -47,7 +46,7 @@ class Table extends BaseTable
      * @param mixed $content    Object content
      * @param bool  $multiline  Multiline result
      * @param bool  $raw        Is raw object
-     * @return \MwbExporter\Object\JS
+     * @return \NTLAB\Object\JS
      */
     public function getJSObject($content, $multiline = true, $raw = false)
     {
@@ -56,7 +55,7 @@ class Table extends BaseTable
 
         return new JS($content, [
             'indentation' => $indentation->getIndentation(1),
-            'multiline' => $multiline,
+            'inline' => !$multiline,
             'raw' => $raw,
         ]);
     }
@@ -95,15 +94,17 @@ class Table extends BaseTable
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
                     $writer
-                        ->write($_this->getFormatter()->getFormattedComment($content, Comment::FORMAT_JS, null))
+                        ->writeComment($content)
                         ->write('')
                     ;
                 }
                 if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
-                    $writer
-                        ->write($_this->getFormatter()->getComment(Comment::FORMAT_JS))
-                        ->write('')
-                    ;
+                    if ($content = $_this->getFormatter()->getComment(null)) {
+                        $writer
+                            ->writeComment($content)
+                            ->write('')
+                        ;
+                    }
                 }
             })
             ->write("module.exports = function(sequelize, DataTypes) {")
