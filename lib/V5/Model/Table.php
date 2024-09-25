@@ -94,18 +94,14 @@ class Table extends BaseTable
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
                     $writer
-                        ->commentStart()
-                            ->write($content)
-                        ->commentEnd()
+                        ->writeComment($content)
                         ->write('')
                     ;
                 }
                 if ($_this->getConfig(CommentConfiguration::class)->getValue()) {
                     if ($content = $_this->getFormatter()->getComment(null)) {
                         $writer
-                            ->commentStart()
-                                ->write($content)
-                            ->commentEnd()
+                            ->writeComment($content)
                             ->write('')
                         ;
                     }
