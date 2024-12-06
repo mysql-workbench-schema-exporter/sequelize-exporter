@@ -104,7 +104,7 @@ class Table extends BaseTable
         $semicolon = $semicolon->getSemiColon();
 
         $writer
-            ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
+            ->writeCallback(function(WriterInterface $writer, ?Table $_this = null) {
                 /** @var \MwbExporter\Configuration\Header $header */
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
@@ -124,7 +124,7 @@ class Table extends BaseTable
             })
             ->write("const { Sequelize, DataTypes } = require('$packageName')$semicolon")
             ->write("")
-            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($extendable) {
+            ->writeCallback(function(WriterInterface $writer, ?Table $_this = null) use ($extendable) {
                 if ($extendable) {
                     $writer
                         ->commentStart("/**")
@@ -187,13 +187,13 @@ class Table extends BaseTable
                 ->writeIf($extendable, "}")
                 ->write("")
                 ->write("const $modelVarName = sequelize.define('$modelName', attributes, options)$semicolon")
-                ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
+                ->writeCallback(function(WriterInterface $writer, ?Table $_this = null) use ($modelVarName, $semicolon) {
                     if ($_this->getConfig(AssociationConfiguration::class)->getValue()) {
                         $writer
                             ->write("")
                             ->write("$modelVarName.associate = () => {")
                             ->indent()
-                            ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($modelVarName, $semicolon) {
+                            ->writeCallback(function(WriterInterface $writer, ?Table $_this = null) use ($modelVarName, $semicolon) {
                                 $_this->writeASsociations($writer, $modelVarName, $semicolon);
                             })
                             ->outdent()
