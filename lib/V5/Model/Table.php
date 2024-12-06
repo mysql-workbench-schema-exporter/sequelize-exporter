@@ -89,7 +89,7 @@ class Table extends BaseTable
         $semicolon = $semicolon->getSemiColon();
 
         $writer
-            ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
+            ->writeCallback(function(WriterInterface $writer, ?Table $_this = null) {
                 /** @var \MwbExporter\Configuration\Header $header */
                 $header = $_this->getConfig(HeaderConfiguration::class);
                 if ($content = $header->getHeader()) {
