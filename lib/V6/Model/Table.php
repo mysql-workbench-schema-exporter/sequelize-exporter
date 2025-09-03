@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2024 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2025 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  * Copyright (c) 2021 Marc-Olivier Laux <marco@matlaux.net>
  *
@@ -69,6 +69,7 @@ class Table extends BaseTable
             'indentation' => $indentation->getIndentation(1),
             'inline' => !$multiline,
             'raw' => $raw,
+            'skip_null' => true,
         ]);
     }
 
