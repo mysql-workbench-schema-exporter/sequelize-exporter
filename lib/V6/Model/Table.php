@@ -4,7 +4,7 @@
  * The MIT License
  *
  * Copyright (c) 2012 Allan Sun <sunajia@gmail.com>
- * Copyright (c) 2012-2024 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2012-2025 Toha <tohenk@yahoo.com>
  * Copyright (c) 2013 WitteStier <development@wittestier.nl>
  * Copyright (c) 2021 Marc-Olivier Laux <marco@matlaux.net>
  *
@@ -69,6 +69,7 @@ class Table extends BaseTable
             'indentation' => $indentation->getIndentation(1),
             'inline' => !$multiline,
             'raw' => $raw,
+            'skip_null' => true,
         ]);
     }
 
@@ -135,13 +136,11 @@ class Table extends BaseTable
                             ->write("```")
                             ->write("function attrCallback(attributes) {")
                             ->write("    // do something with attributes")
-                            ->write("    return attributes;")
                             ->write("}")
                             ->write("```")
                             ->write("")
                             ->write("@callback attrCallback")
                             ->write("@param {object} attributes Model attributes")
-                            ->write("@returns {object}")
                         ->commentEnd()
                         ->write("")
                         ->commentStart()
@@ -152,13 +151,11 @@ class Table extends BaseTable
                             ->write("```")
                             ->write("function optCallback(options) {")
                             ->write("    // do something with options")
-                            ->write("    return options;")
                             ->write("}")
                             ->write("```")
                             ->write("")
                             ->write("@callback optCallback")
                             ->write("@param {object} options Model options")
-                            ->write("@returns {object}")
                         ->commentEnd()
                         ->write("")
                     ;
@@ -173,16 +170,16 @@ class Table extends BaseTable
             ->commentEnd()
             ->write("module.exports = %s => {", $extendable ? "(sequelize, attrCallback = null, optCallback = null)" : "sequelize")
             ->indent()
-                ->write("let attributes = %s", $this->asModel())
-                ->write("let options = %s", $this->asOptions())
+                ->write("const attributes = %s", $this->asModel())
+                ->write("const options = %s", $this->asOptions())
                 ->writeIf($extendable, "if (typeof attrCallback === 'function') {")
                 ->indent()
-                    ->writeIf($extendable, "attributes = attrCallback(attributes)$semicolon")
+                    ->writeIf($extendable, "attrCallback(attributes)$semicolon")
                 ->outdent()
                 ->writeIf($extendable, "}")
                 ->writeIf($extendable, "if (typeof optCallback === 'function') {")
                 ->indent()
-                    ->writeIf($extendable, "options = optCallback(options)$semicolon")
+                    ->writeIf($extendable, "optCallback(options)$semicolon")
                 ->outdent()
                 ->writeIf($extendable, "}")
                 ->write("")
